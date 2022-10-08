@@ -67,13 +67,6 @@ module ethos::checker_board {
 
     public(friend) fun modify(board: &mut CheckerBoard, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
         let old_space = space_at_mut(board, from_row, from_col);
-        if (option::is_some(old_space)) {
-            std::debug::print(&0)
-        } else {
-            std::debug::print(&1);
-            std::debug::print(&from_row);
-            std::debug::print(&from_col);
-        };
         let piece = option::swap(old_space, Empty);
 
         let new_space = space_at_mut(board, to_row, to_col);
