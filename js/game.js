@@ -17,6 +17,8 @@ const board = require('./board');
 const moves = require('./moves');
 const confetti = require('./confetti');
 
+const DASHBOARD_LINK = 'https://ethoswallet.xyz/dashboard';
+
 let walletSigner;
 let games;
 let activeGameAddress;
@@ -59,6 +61,40 @@ window.onkeydown = (e) => {
       }
     }
   );
+}
+
+function init() {
+  // test();
+
+  leaderboard.load();
+  
+  const ethosConfiguration = {
+    appId: 'sui-8192'
+  };
+
+  const start = eById('ethos-start');
+  const button = React.createElement(
+    SignInButton,
+    {
+      key: 'sign-in-button',
+      className: 'start-button',
+      children: "Sign In"
+    }
+  )
+
+  const wrapper = React.createElement(
+    EthosWrapper,
+    {
+      ethosConfiguration,
+      onWalletConnected,
+      children: [button]
+    }
+  )
+
+  const root = ReactDOM.createRoot(start);
+  root.render(wrapper);
+  
+  initializeClicks();
 }
 
 function handleResult(newBoard, direction) { 
@@ -204,7 +240,6 @@ async function loadGames() {
         setActiveGame(game);
       }
     );
-    // gameElement.innerHTML = game.topTile;
 
     gameElement.innerHTML = `
       <div class='leader-stats flex-1'> 
@@ -219,26 +254,11 @@ async function loadGames() {
         <div class="${leaderboardItem && leaderboardItemUpToDate ? '' : 'hidden'}">
           <span class="light">Leaderboard:</span> <span class='bold'>${leaderboardItemIndex + 1}</span>
         </div>
-        <button class='potential-leaderboard-game ${leaderboardItemUpToDate ? 'hidden' : ''}' data-address='${game.address}'>
+        <button class='potential-leaderboard-game ${leaderboardItemUpToDate ? 'hidden' : ''}'>
           ${leaderboardItem ? 'Update' : 'Add To'} Leaderboard
         </button>
       </div>
     `
-
-    // <div class='leaderboard-name flex-1 '>
-    //     <div title='${leaderAddress}'>
-    //       ${truncateMiddle(leaderAddress)}
-    //     </div>
-    //   </div>
-    //   <div class='game-preview-tile color${game.topTile + 1} title'>
-    //     <img src='${game.imageUri}' height="30px", width="30px" />
-    //   </div>
-    //   <div class='text-center' style='padding: 6px 0;'>
-    //     Score: ${game.score}
-    //   </div>
-    //   <div class='text-center'>
-    
-    //   </div>
 
     gamesElement.append(gameElement);
 
@@ -316,157 +336,7 @@ function showLeaderboard() {
   addClass(eByClass('leaderboard-button'), 'selected');
 }
 
-function init() {
-  // test();
-
-  leaderboard.load();
-  
-  const ethosConfiguration = {
-    appId: 'sui-8192'
-  };
-
-  const start = eById('ethos-start');
-  const mint = eById('mint-game');
-
-  const button = React.createElement(
-    SignInButton,
-    {
-      key: 'sign-in-button',
-      className: 'start-button',
-      children: "Sign In"
-    }
-  )
-
-  const wrapper = React.createElement(
-    EthosWrapper,
-    {
-      ethosConfiguration,
-      onWalletConnected: async ({ signer }) => {
-        walletSigner = signer;
-        if (signer) {
-          modal.close();
-        
-          addClass(document.body, 'signed-in');
-
-          // const response = await ethos.sign({ signer: walletSigner, signData: "YO" });
-          // console.log("SIGN", response);
-          
-          const prepMint = async () => {
-            const mintButtonTitle = "Mint New Game";
-            if (mint.innerHTML.indexOf(mintButtonTitle) === -1) {
-              const mintButton = document.createElement("BUTTON");
-              setOnClick(
-                mintButton,
-                async () => {
-                  modal.open('loading', 'container');
-
-                  const details = {
-                    network: 'sui',
-                    address: contractAddress,
-                    moduleName: 'game_8192',
-                    functionName: 'create',
-                    inputValues: [],
-                    gasBudget: 5000
-                  };
-              
-                  try {
-                    const data = await ethos.transact({
-                      signer: walletSigner, 
-                      details
-                    })
-
-                    if (!data) {
-                      modal.open('create-error', 'container');
-                      return;
-                    }
-
-                    const gameData = data.effects.events.find(
-                      e => e.moveEvent
-                    ).moveEvent.fields;
-                    const { board_spaces, score } = gameData;
-                    const game = {
-                      address: data.effects.created[0].reference.objectId,
-                      boards: [
-                        {
-                          score,
-                          board_spaces,
-                          game_over: false
-                        }
-                      ]
-                    }
-                    setActiveGame(game);
-                    ethos.hideWallet();
-                  } catch (e) {
-                    modal.open('create-error', 'container');
-                    return;
-                  }
-                }
-              );
-              mintButton.innerHTML = mintButtonTitle;
-              mint.appendChild(mintButton);
-            }
-          }
-
-          prepMint();
-          modal.open('loading', 'container');
-
-          setOnClick(
-            eByClass('new-game'),
-            async () => {
-              modal.open('mint', 'container');
-            }
-          );
-          
-          await loadGames();
-
-          if (!contentsInterval) {
-            contentsInterval = setInterval(loadWalletContents, 3000)
-          }
-
-          if (games.length === 0) {
-            modal.open('mint', 'board', true);  
-          } else {
-            modal.close();
-
-            if (games.length === 1) {
-              setActiveGame(games[0]);
-            } else {
-              showLeaderboard();
-            }
-          }
-          
-          removeClass(document.body, 'signed-out');
-
-          const address = await signer.getAddress();
-
-          setOnClick(
-            eById('copy-address'),
-            () => {
-              const innerHTML = eById('copy-address').innerHTML;
-              eById('copy-address').innerHTML = "Copied!"
-              navigator.clipboard.writeText(address)
-              setTimeout(() => {
-                eById('copy-address').innerHTML = innerHTML;
-              }, 1000);
-            }
-          );
-        } else {
-          modal.open('get-started', 'board', true);
-          setOnClick(eByClass('new-game'), ethos.showSignInModal)
-          addClass(document.body, 'signed-out');
-          removeClass(document.body, 'signed-in');
-          addClass(eById('loading-games'), 'hidden');
-        }
-      },
-      children: [button]
-    }
-  )
-
-  const root = ReactDOM.createRoot(start);
-  root.render(wrapper);
-  
-  // modal.close();
-
+const initializeClicks = () => {
   setOnClick(eByClass('close-error'), () => {
     addClass(eByClass('error'), 'hidden');
   })
@@ -476,11 +346,11 @@ function init() {
   
   setOnClick(
     eById('balance'), 
-    () => window.open('https://ethoswallet.xyz/dashboard')
+    () => window.open(DASHBOARD_LINK)
   )
   setOnClick(
     eById('wallet-address'), 
-    () => window.open('https://ethoswallet.xyz/dashboard')
+    () => window.open(DASHBOARD_LINK)
   )
 
   setOnClick(
@@ -542,6 +412,125 @@ function init() {
   setOnClick(eById('close-faucet'), () => {
     addClass(eById('faucet'), 'hidden')
   })
+}
+
+const onWalletConnected = async ({ signer }) => {
+  walletSigner = signer;
+  if (signer) {
+    modal.close();
+  
+    addClass(document.body, 'signed-in');
+
+    // const response = await ethos.sign({ signer: walletSigner, signData: "YO" });
+    // console.log("SIGN", response);
+    
+    const prepMint = async () => {
+      const mint = eById('mint-game');
+      const mintButtonTitle = "Mint New Game";
+      if (mint.innerHTML.indexOf(mintButtonTitle) === -1) {
+        const mintButton = document.createElement("BUTTON");
+        setOnClick(
+          mintButton,
+          async () => {
+            modal.open('loading', 'container');
+
+            const details = {
+              network: 'sui',
+              address: contractAddress,
+              moduleName: 'game_8192',
+              functionName: 'create',
+              inputValues: [],
+              gasBudget: 5000
+            };
+        
+            try {
+              const data = await ethos.transact({
+                signer: walletSigner, 
+                details
+              })
+
+              if (!data) {
+                modal.open('create-error', 'container');
+                return;
+              }
+
+              const gameData = data.effects.events.find(
+                e => e.moveEvent
+              ).moveEvent.fields;
+              const { board_spaces, score } = gameData;
+              const game = {
+                address: data.effects.created[0].reference.objectId,
+                boards: [
+                  {
+                    score,
+                    board_spaces,
+                    game_over: false
+                  }
+                ]
+              }
+              setActiveGame(game);
+              ethos.hideWallet();
+            } catch (e) {
+              modal.open('create-error', 'container');
+              return;
+            }
+          }
+        );
+        mintButton.innerHTML = mintButtonTitle;
+        mint.appendChild(mintButton);
+      }
+    }
+
+    prepMint();
+    modal.open('loading', 'container');
+
+    setOnClick(
+      eByClass('new-game'),
+      async () => {
+        modal.open('mint', 'container');
+      }
+    );
+    
+    await loadGames();
+
+    if (!contentsInterval) {
+      contentsInterval = setInterval(loadWalletContents, 3000)
+    }
+
+    if (games.length === 0) {
+      modal.open('mint', 'board', true);  
+    } else {
+      modal.close();
+
+      if (games.length === 1) {
+        setActiveGame(games[0]);
+      } else {
+        showLeaderboard();
+      }
+    }
+    
+    removeClass(document.body, 'signed-out');
+
+    const address = await signer.getAddress();
+
+    setOnClick(
+      eById('copy-address'),
+      () => {
+        const innerHTML = eById('copy-address').innerHTML;
+        eById('copy-address').innerHTML = "Copied!"
+        navigator.clipboard.writeText(address)
+        setTimeout(() => {
+          eById('copy-address').innerHTML = innerHTML;
+        }, 1000);
+      }
+    );
+  } else {
+    modal.open('get-started', 'board', true);
+    setOnClick(eByClass('new-game'), ethos.showSignInModal)
+    addClass(document.body, 'signed-out');
+    removeClass(document.body, 'signed-in');
+    addClass(eById('loading-games'), 'hidden');
+  }
 }
 
 window.requestAnimationFrame(init);

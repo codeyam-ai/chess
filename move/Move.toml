@@ -1,5 +1,5 @@
 [package]
-name = "sui8192"
+name = "ethos-checkers"
 version = "0.0.1"
 
 [dependencies]
