@@ -10,6 +10,8 @@ module ethos::checkers {
     use ethos::checker_board::{Self, CheckerBoard};
 
     const EInvalidPlayer: u64 = 0;
+    const Player1: u8 = 1;
+    const Player2: u8 = 2;
 
     struct CheckersGame has key, store {
         id: UID,
@@ -22,6 +24,14 @@ module ethos::checkers {
         boards: vector<CheckerBoard>,
         current_player: address,
         winner: Option<address>
+    }
+
+    struct CheckersPlayerCap has key, store {
+        id: UID,
+        game_id: ID,
+        name: String,
+        description: String,
+        url: Url
     }
 
     struct CheckersMove has store {
@@ -79,11 +89,25 @@ module ethos::checkers {
             player2
         });
         
-        transfer::transfer(game, player1);
+        transfer::share_object(game);
     }
 
-    public entry fun make_move(game: CheckersGame, fromRow: u8, fromColumn: u8, toRow: u8, toColumn: u8) {
+    public entry fun make_move(game: &mut CheckersGame, fromRow: u64, fromColumn: u64, toRow: u64, toColumn: u64) { //ctx: &mut TxContext) {
+        let board = current_board_mut(game);
+        // let player = tx_context::sender(ctx);
+        
+        // let player_number = Player1;
+        // if (player == game.player2) {
+        //     player_number = Player2;
+        // } else {
+        //     assert!(player == game.player1, EInvalidPlayer)
+        // };
 
+        checker_board::modify(board, fromRow, fromColumn, toRow, toColumn);
+    }
+
+    public fun game_id(game: &CheckersGame): &UID {
+        &game.id
     }
 
     public fun player1(game: &CheckersGame): &address {
@@ -102,13 +126,30 @@ module ethos::checkers {
         vector::borrow(&game.boards, index)
     }
 
-    public fun piece_at(game: &CheckersGame, row: u64, column: u64): &u8 {
+    public fun board_at_mut(game: &mut CheckersGame, index: u64): &mut CheckerBoard {
+        vector::borrow_mut(&mut game.boards, index)
+    }
+
+    public fun current_board(game: &CheckersGame): &CheckerBoard {
         let last_board_index = vector::length(&game.boards) - 1;
-        let last_board = vector::borrow(&game.boards, last_board_index);
-        checker_board::piece_at(last_board, row, column)
+        board_at(game, last_board_index)
+    }
+
+    public fun current_board_mut(game: &mut CheckersGame): &mut CheckerBoard {
+        let last_board_index = vector::length(&game.boards) - 1;
+        board_at_mut(game, last_board_index)
+    }
+
+    public fun piece_at(game: &CheckersGame, row: u64, column: u64): &u8 {
+        let board = current_board(game);
+        checker_board::piece_at(board, row, column)
     }
 
     public fun current_player(game: &CheckersGame): &address {
         &game.current_player
+    }
+
+    public fun player_cap_game_id(player_cap: &CheckersPlayerCap): &ID {
+        &player_cap.game_id
     }
 }

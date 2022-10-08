@@ -10,13 +10,13 @@ module ethos::checker_board {
     #[test_only]
     friend ethos::checkers_tests;
 
-    const EMPTY: u8 = 0;
-    const PLAYER1: u8 = 1;
-    const PLAYER2: u8 = 2;
+    const Empty: u8 = 0;
+    const Player1: u8 = 1;
+    const Player2: u8 = 2;
 
-    const ROW_COUNT: u64 = 8;
-    const COLUMN_COUNT: u64 = 8;
-    const PLAYER_PIECES: u64 = 12;
+    const RowCount: u64 = 8;
+    const ColumnCount: u64 = 8;
+    const PlayerPieces: u64 = 12;
     
     struct CheckerBoard has store, copy {
         spaces: vector<vector<Option<u8>>>,
@@ -32,18 +32,18 @@ module ethos::checker_board {
         let spaces = vector[];
 
         let i=0;
-        while (i < ROW_COUNT) {
+        while (i < RowCount) {
             let row = vector[];
 
             let j=0;
-            while (j < COLUMN_COUNT) {
+            while (j < ColumnCount) {
                 if (valid_space(i, j)) {
                     if (i < 4) {
-                        vector::push_back(&mut row, option::some(PLAYER1))
+                        vector::push_back(&mut row, option::some(Player1))
                     } else if (i > 5) {
-                        vector::push_back(&mut row, option::some(PLAYER2))
+                        vector::push_back(&mut row, option::some(Player2))
                     } else {
-                        vector::push_back(&mut row, option::some(EMPTY))
+                        vector::push_back(&mut row, option::some(Empty))
                     }        
                 } else {
                     vector::push_back(&mut row, option::none())
@@ -64,13 +64,24 @@ module ethos::checker_board {
 
         game_board 
     }
+
+    public(friend) fun modify(board: &mut CheckerBoard, fromRow: u64, fromCol: u64, toRow: u64, toCol: u64): bool {
+        let old_space = space_at_mut(board, fromRow, fromCol);
+        let piece = option::extract(old_space);
+        option::fill(old_space, Empty);
+
+        let new_space = space_at_mut(board, toRow, toCol);
+        option::fill(new_space, piece);
+
+        true
+    }
     
     public fun row_count(): u64 {
-        ROW_COUNT
+        RowCount
     }
 
     public fun column_count(): u64 {
-        COLUMN_COUNT
+        ColumnCount
     }
 
     fun spaces_at(spaces: &vector<vector<Option<u8>>>, row_index: u64, column_index: u64): &Option<u8> {
@@ -95,11 +106,11 @@ module ethos::checker_board {
         let empty_spaces = vector<SpacePosition>[];
 
         let row = 0;
-        while (row < ROW_COUNT) {
+        while (row < RowCount) {
           let column = 0;
-          while (column < COLUMN_COUNT) {
+          while (column < ColumnCount) {
             let space = space_at(game_board, row, column);
-            if (option::contains(space, &EMPTY)) {
+            if (option::contains(space, &Empty)) {
               vector::push_back(&mut empty_spaces, SpacePosition { row, column })
             };
             column = column + 1;
