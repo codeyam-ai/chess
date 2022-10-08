@@ -9,9 +9,9 @@ module ethos::checkers {
     use std::option::{Self, Option};
     use ethos::checker_board::{Self, CheckerBoard};
 
-    const EInvalidPlayer: u64 = 0;
-    const Player1: u8 = 1;
-    const Player2: u8 = 2;
+    const EINVALID_PLAYER: u64 = 0;
+    const PLAYER1: u8 = 1;
+    const PLAYER2: u8 = 2;
 
     struct CheckersGame has key, store {
         id: UID,
@@ -96,11 +96,11 @@ module ethos::checkers {
         let board = current_board_mut(game);
         // let player = tx_context::sender(ctx);
         
-        // let player_number = Player1;
+        // let player_number = PLAYER1;
         // if (player == game.player2) {
-        //     player_number = Player2;
+        //     player_number = PLAYER2;
         // } else {
-        //     assert!(player == game.player1, EInvalidPlayer)
+        //     assert!(player == game.player1, EINVALID_PLAYER)
         // };
 
         checker_board::modify(board, fromRow, fromColumn, toRow, toColumn);

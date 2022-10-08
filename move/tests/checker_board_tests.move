@@ -26,10 +26,10 @@ module ethos::checker_board_tests {
         use ethos::checker_board::{new, modify, piece_at};
 
         let board = new();
-        modify(&mut board, 3, 1, 4, 2);
+        modify(&mut board, 2, 1, 3, 2);
 
-        assert!(piece_at(&board, 5, 4) == &0, (*piece_at(&board, 5, 4) as u64));
-        assert!(piece_at(&board, 4, 3) == &2, (*piece_at(&board, 4, 3) as u64));
+        assert!(piece_at(&board, 2, 1) == &0, (*piece_at(&board, 2, 1) as u64));
+        assert!(piece_at(&board, 3, 2) == &1, (*piece_at(&board, 3, 2) as u64));
 
         transfer::share_object(TestCheckerBoard { board });
     }
