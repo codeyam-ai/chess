@@ -1,11 +1,11 @@
-module ethos::checkers_board {
+module ethos::checker_board {
     use std::option::{Self, Option};
     use std::vector;
     
     friend ethos::checkers;
 
     #[test_only]
-    friend ethos::checkers_board_tests;
+    friend ethos::checker_board_tests;
 
     #[test_only]
     friend ethos::checkers_tests;
@@ -18,7 +18,7 @@ module ethos::checkers_board {
     const COLUMN_COUNT: u64 = 8;
     const PLAYER_PIECES: u64 = 12;
     
-    struct CheckersBoard has store, copy {
+    struct CheckerBoard has store, copy {
         spaces: vector<vector<Option<u8>>>,
         game_over: bool
     }
@@ -28,7 +28,7 @@ module ethos::checkers_board {
         column: u64
     }
 
-    public(friend) fun new(): CheckersBoard {
+    public(friend) fun new(): CheckerBoard {
         let spaces = vector[];
 
         let i=0;
@@ -57,7 +57,7 @@ module ethos::checkers_board {
             i = i + 1;
         };
 
-        let game_board = CheckersBoard { 
+        let game_board = CheckerBoard { 
             spaces, 
             game_over: false
         };
@@ -83,15 +83,15 @@ module ethos::checkers_board {
         vector::borrow_mut(row, column_index)
     }
 
-    public(friend) fun space_at(game_board: &CheckersBoard, row_index: u64, column_index: u64): &Option<u8> {
-        spaces_at(&game_board.spaces, row_index, column_index)
+    public(friend) fun space_at(board: &CheckerBoard, row_index: u64, column_index: u64): &Option<u8> {
+        spaces_at(&board.spaces, row_index, column_index)
     }
 
-    public(friend) fun space_at_mut(game_board: &mut CheckersBoard, row_index: u64, column_index: u64): &mut Option<u8> {
-        spaces_at_mut(&mut game_board.spaces, row_index, column_index)
+    public(friend) fun space_at_mut(board: &mut CheckerBoard, row_index: u64, column_index: u64): &mut Option<u8> {
+        spaces_at_mut(&mut board.spaces, row_index, column_index)
     }
 
-    public(friend) fun empty_space_positions(game_board: &CheckersBoard): vector<SpacePosition> {
+    public(friend) fun empty_space_positions(game_board: &CheckerBoard): vector<SpacePosition> {
         let empty_spaces = vector<SpacePosition>[];
 
         let row = 0;
@@ -110,7 +110,7 @@ module ethos::checkers_board {
         empty_spaces
     }
 
-    public(friend) fun empty_space_count(game_board: &CheckersBoard): u64 {
+    public(friend) fun empty_space_count(game_board: &CheckerBoard): u64 {
         vector::length(&empty_space_positions(game_board))
     }
 
@@ -120,6 +120,10 @@ module ethos::checkers_board {
         } else {
             column % 2 == 1
         }
+    }
+
+    public(friend) fun piece_at(board: &CheckerBoard, row: u64, column: u64): &u8 {
+        option::borrow(space_at(board, row, column))
     }
 
 

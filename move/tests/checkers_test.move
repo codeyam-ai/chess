@@ -30,4 +30,38 @@ module ethos::checkers_tests {
             test_scenario::return_owned(scenario, game)
         }   
     }
+
+    #[test]
+    fun test_make_move() {
+        let scenario = &mut test_scenario::begin(&PLAYER1);
+        {
+            checkers::create_game(PLAYER2, test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, &PLAYER1);
+        {
+            let game = test_scenario::take_owned<CheckersGame>(scenario);
+            
+            checkers::make_move(game, 2, 1, 3, 2);
+            assert!(checkers::piece_at(&game, 2, 1) == &0, checkers::piece_at(&game, 2, 1));
+            assert!(checkers::piece_at(&game, 3, 2) == &1, checkers::piece_at(&game, 3, 2));
+
+            assert!(checkers::current_player(&game) == &2, checkers::current_player(&game));
+
+            test_scenario::return_owned(scenario, game)
+        };
+
+        test_scenario::next_tx(scenario, &PLAYER2);
+        {
+            let game = test_scenario::take_owned<CheckersGame>(scenario);
+            
+            checkers::make_move(game, 5, 4, 4, 3);
+            assert!(checkers::piece_at(&game, 5, 4) == &0, checkers::piece_at(&game, 5, 4));
+            assert!(checkers::piece_at(&game, 4, 3) == &2, checkers::piece_at(&game, 4, 3));
+
+            assert!(checkers::current_player(&game) == &1, checkers::current_player(&game));
+
+            test_scenario::return_owned(scenario, game)
+        }   
+    }
 }

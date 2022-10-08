@@ -1,16 +1,16 @@
 
 #[test_only]
-module ethos::checkers_board_tests {
-    use ethos::checkers_board::CheckersBoard;
+module ethos::checker_board_tests {
+    use ethos::checker_board::CheckerBoard;
     use sui::transfer;
 
     struct TestGameBoard has key {
-        game_board: CheckersBoard
+        game_board: CheckerBoard
     }
 
     #[test]
     fun test_new() {
-        use ethos::checkers_board::{new, row_count, column_count, empty_space_count};
+        use ethos::checker_board::{new, row_count, column_count, empty_space_count};
 
         let game_board = new();
         assert!(row_count() == 8, row_count());
