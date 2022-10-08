@@ -66,15 +66,19 @@ module ethos::checkers {
     }
 
     public entry fun create_game(player2: address, ctx: &mut TxContext) {
-        let uid = object::new(ctx);
+        let game_uid = object::new(ctx);
         let player1 = tx_context::sender(ctx);
         let new_board = checker_board::new();
         
+        let name = string::utf8(b"Ethos Checkers");
+        let description = string::utf8(b"Checkers - built on Sui  - by Ethos");
+        let url = url::new_unsafe_from_bytes(b"https://CheckerBoard.png");
+        
         let game = CheckersGame {
-            id: uid,
-            name: string::utf8(b"Ethos Checkers"),
-            description: string::utf8(b"Checkers - built on Sui  - by Ethos"),
-            url: url::new_unsafe_from_bytes(b"https://CheckerBoard.png"),
+            id: game_uid,
+            name,
+            description,
+            url,
             player1,
             player2,
             moves: vector[],
@@ -82,14 +86,34 @@ module ethos::checkers {
             current_player: player1,
             winner: option::none()
         };
+        
+        let game_id = object::uid_to_inner(&game.id);
+        
+        let player1_cap = CheckersPlayerCap {
+            id: object::new(ctx),
+            game_id,
+            name,
+            description,
+            url,
+        };
+
+        let player2_cap = CheckersPlayerCap {
+            id: object::new(ctx),
+            game_id,
+            name,
+            description,
+            url,
+        };
 
         event::emit(NewCheckersGameEvent {
-            game_id: object::uid_to_inner(&game.id),
+            game_id,
             player1,
             player2
         });
         
         transfer::share_object(game);
+        transfer::transfer(player1_cap, player1);
+        transfer::transfer(player2_cap, player2);
     }
 
     public entry fun make_move(game: &mut CheckersGame, fromRow: u64, fromColumn: u64, toRow: u64, toColumn: u64, ctx: &mut TxContext) {
