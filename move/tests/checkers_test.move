@@ -21,7 +21,7 @@ module ethos::checkers_tests {
             
             assert!(checkers::player1(&game) == &PLAYER1, 0);
             assert!(checkers::player2(&game) == &PLAYER2, 0);
-            assert!(checkers::move_count(&game) == 0, 1);
+            assert!(checkers::move_count(&game) == 0, checkers::move_count(&game));
           
             let game_board = checkers::board_at(&game, 0);
             let empty_space_count = checkers_board::empty_space_count(game_board);

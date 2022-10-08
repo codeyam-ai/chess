@@ -3,11 +3,11 @@ module ethos::checkers {
     use sui::tx_context::{Self, TxContext};
     use sui::url::{Self, Url};
     use std::string::{Self, String};
-    // use sui::event;
+    use sui::event;
     use sui::transfer;
     use std::vector;
     use std::option::{Self, Option};
-    use ethos::checkers_board::CheckersBoard;
+    use ethos::checkers_board::{Self, CheckersBoard};
 
     const EInvalidPlayer: u64 = 0;
 
@@ -34,9 +34,8 @@ module ethos::checkers {
 
     struct NewCheckersGameEvent has copy, drop {
         game_id: ID,
-        player: address,
-        board_spaces: vector<vector<Option<u8>>>,
-        score: u64
+        player1: address,
+        player2: address
     }
 
     struct CheckersMoveEvent has copy, drop {
@@ -58,6 +57,7 @@ module ethos::checkers {
     public entry fun create_game(player2: address, ctx: &mut TxContext) {
         let uid = object::new(ctx);
         let player1 = tx_context::sender(ctx);
+        let new_board = checkers_board::new();
         
         let game = CheckersGame {
             id: uid,
@@ -67,17 +67,15 @@ module ethos::checkers {
             player1,
             player2,
             moves: vector[],
-            boards: vector[],
+            boards: vector[new_board],
             winner: option::none()
         };
 
-        // event::emit(NewCheckersGameEvent {
-        //     game_id: object::uid_to_inner(&game.id),
-        //     // leaderboard_id,
-        //     player,
-        //     board_spaces,
-        //     score
-        // });
+        event::emit(NewCheckersGameEvent {
+            game_id: object::uid_to_inner(&game.id),
+            player1,
+            player2
+        });
         
         transfer::transfer(game, player1);
     }
@@ -91,7 +89,7 @@ module ethos::checkers {
     }
 
     public fun move_count(game: &CheckersGame): u64 {
-        vector::length(&game.boards)
+        vector::length(&game.moves)
     }
 
     public fun board_at(game: &CheckersGame, index: u64): &CheckersBoard {
