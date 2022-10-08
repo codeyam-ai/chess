@@ -92,18 +92,18 @@ module ethos::checkers {
         transfer::share_object(game);
     }
 
-    public entry fun make_move(game: &mut CheckersGame, fromRow: u64, fromColumn: u64, toRow: u64, toColumn: u64) { //ctx: &mut TxContext) {
+    public entry fun make_move(game: &mut CheckersGame, fromRow: u64, fromColumn: u64, toRow: u64, toColumn: u64, ctx: &mut TxContext) {
         let board = current_board_mut(game);
-        // let player = tx_context::sender(ctx);
         
-        // let player_number = PLAYER1;
-        // if (player == game.player2) {
-        //     player_number = PLAYER2;
-        // } else {
-        //     assert!(player == game.player1, EINVALID_PLAYER)
-        // };
-
         checker_board::modify(board, fromRow, fromColumn, toRow, toColumn);
+
+        let player = tx_context::sender(ctx);     
+        if (player == game.player1) {
+            game.current_player = *&game.player2;
+        } else {
+            game.current_player = *&game.player1;
+        }
+        
     }
 
     public fun game_id(game: &CheckersGame): &UID {

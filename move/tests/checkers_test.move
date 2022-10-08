@@ -61,7 +61,7 @@ module ethos::checkers_tests {
 
         let game_wrapper = test_scenario::take_shared<CheckersGame>(scenario);
         let game = test_scenario::borrow_mut(&mut game_wrapper);         
-        make_move(game, 2, 1, 3, 2);
+        make_move(game, 2, 1, 3, 2, test_scenario::ctx(scenario));
 
         test_scenario::next_tx(scenario, &PLAYER2);
         {
@@ -69,7 +69,7 @@ module ethos::checkers_tests {
             assert!(piece_at(game, 3, 2) == &1, (*piece_at(game, 3, 2) as u64));
             assert!(current_player(game) == &PLAYER2, 1);
 
-            make_move(game, 5, 4, 4, 3);
+            make_move(game, 5, 4, 4, 3, test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, &PLAYER1);

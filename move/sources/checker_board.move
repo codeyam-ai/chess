@@ -38,9 +38,9 @@ module ethos::checker_board {
             let j=0;
             while (j < ColumnCount) {
                 if (valid_space(i, j)) {
-                    if (i < 4) {
+                    if (i < 3) {
                         vector::push_back(&mut row, option::some(PLAYER1))
-                    } else if (i > 5) {
+                    } else if (i > 4) {
                         vector::push_back(&mut row, option::some(PLAYER2))
                     } else {
                         vector::push_back(&mut row, option::some(Empty))
@@ -68,7 +68,7 @@ module ethos::checker_board {
     public(friend) fun modify(board: &mut CheckerBoard, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
         let old_space = space_at_mut(board, from_row, from_col);
         let piece = option::swap(old_space, Empty);
-
+        
         let new_space = space_at_mut(board, to_row, to_col);
         option::swap(new_space, piece);
 
