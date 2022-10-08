@@ -8,6 +8,7 @@ module ethos::checkers_board_tests {
         game_board: CheckersBoard
     }
 
+    #[test]
     fun test_new() {
         use ethos::checkers_board::{new, row_count, column_count, empty_space_count};
 

@@ -8,6 +8,7 @@ module ethos::checkers_tests {
     const PLAYER1: address = @0xCAFE;
     const PLAYER2: address = @0xA1C05;
 
+    #[test]
     fun test_game_create() {
         let scenario = &mut test_scenario::begin(&PLAYER1);
         {
