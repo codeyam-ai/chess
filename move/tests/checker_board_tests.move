@@ -36,11 +36,33 @@ module ethos::checker_board_tests {
 
     #[test]
     #[expected_failure(abort_code = 0)]
-    fun test_modify_bad_to() {
+    fun test_modify_bad_from() {
         use ethos::checker_board::{new, modify};
 
         let board = new();
         modify(&mut board, 3, 2, 4, 1);
+
+        transfer::share_object(TestCheckerBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 1)]
+    fun test_modify_bad_to_player1() {
+        use ethos::checker_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, 2, 1, 1, 2);
+
+        transfer::share_object(TestCheckerBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 1)]
+    fun test_modify_bad_to_player2() {
+        use ethos::checker_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, 5, 2, 6, 1);
 
         transfer::share_object(TestCheckerBoard { board });
     }
