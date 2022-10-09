@@ -96,4 +96,16 @@ module ethos::checkers_tests {
             test_scenario::return_shared<CheckersGame>(scenario, game_wrapper);
         };
     }
+
+    // #[test]
+    // fun test_aborts_if_wrong_player_tries_to_move() {
+    // }
+
+    // #[test]
+    // fun test_aborts_if_non_player_tries_to_move() {
+    // }
+
+    // #[test]
+    // fun test_game_over() {
+    // }
 }
