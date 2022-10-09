@@ -146,18 +146,19 @@ module ethos::checker_board_tests {
         transfer::share_object(TestCheckerBoard { board });
     }
 
-    //  #[test]
-    // fun test_modify_double_jump_player1() {
-    //     use ethos::checker_board::{new, modify, empty_space_count};
+     #[test]
+    fun test_modify_double_jump_player1() {
+        use ethos::checker_board::{new, modify, empty_space_count};
 
-    //     let board = new();
-    //     modify(&mut board, 5, 4, 4, 3);
-    //     modify(&mut board, 4, 3, 3, 2);
+        let board = new();
+        modify(&mut board, 5, 4, 4, 3);
+        modify(&mut board, 4, 3, 3, 2);
+        modify(&mut board, 6, 3, 5, 4);
 
-    //     assert!(empty_space_count(&board) == 8, empty_space_count(&board));
-    //     modify(&mut board, 2, 3, 4, 1);
-    //     assert!(empty_space_count(&board) == 9, empty_space_count(&board));
+        assert!(empty_space_count(&board) == 8, empty_space_count(&board));
+        modify(&mut board, 2, 3, 6, 3);
+        assert!(empty_space_count(&board) == 10, empty_space_count(&board));
 
-    //     transfer::share_object(TestCheckerBoard { board });
-    // }
+        transfer::share_object(TestCheckerBoard { board });
+    }
 }
