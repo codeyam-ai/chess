@@ -33,4 +33,15 @@ module ethos::checker_board_tests {
 
         transfer::share_object(TestCheckerBoard { board });
     }
+
+    #[test]
+    #[expected_failure(abort_code = 0)]
+    fun test_modify_bad_to() {
+        use ethos::checker_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, 3, 2, 4, 1);
+
+        transfer::share_object(TestCheckerBoard { board });
+    }
 }
