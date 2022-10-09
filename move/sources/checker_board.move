@@ -21,6 +21,7 @@ module ethos::checker_board {
     const EEMPTY_SPACE: u64 = 0;
     const EBAD_DESTINATION: u64 = 1;
     const EOCCUPIED_SPACE: u64 = 2;
+    const EBAD_JUMP: u64 = 3;
     
     struct CheckerBoard has store, copy {
         spaces: vector<vector<Option<u8>>>,
@@ -30,6 +31,10 @@ module ethos::checker_board {
     struct SpacePosition has copy, drop {
         row: u64,
         column: u64
+    }
+
+    struct MoveEffects has drop {
+        jumps: vector<SpacePosition>
     }
 
     public(friend) fun new(): CheckerBoard {
@@ -70,13 +75,23 @@ module ethos::checker_board {
     }
 
     public(friend) fun modify(board: &mut CheckerBoard, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
-        assert_valid_move(board, from_row, from_col, to_row, to_col);
+        let move_effects = analyze_move(board, from_row, from_col, to_row, to_col);
         
         let old_space = space_at_mut(board, from_row, from_col);
         let piece = option::swap(old_space, EMPTY);
 
         let new_space = space_at_mut(board, to_row, to_col);
         option::swap(new_space, piece);
+
+        let jump_index = 0;
+        let jumps_count = vector::length(&move_effects.jumps);
+        while (jump_index < jumps_count) {
+            let position = vector::borrow(&move_effects.jumps, jump_index);
+            let jump_space = space_at_mut(board, position.row, position.column);
+            option::swap(jump_space, EMPTY);
+
+            jump_index = jump_index + 1;
+        };
 
         true
     }
@@ -142,7 +157,11 @@ module ethos::checker_board {
         }
     }
 
-    fun assert_valid_move(board: &CheckerBoard, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
+    fun analyze_move(board: &CheckerBoard, from_row: u64, from_col: u64, to_row: u64, to_col: u64): MoveEffects {
+        let move_effects = MoveEffects {
+            jumps: vector[]
+        };
+
         let old_space = space_at(board, from_row, from_col);
         let new_space = space_at(board, to_row, to_col);
 
@@ -156,11 +175,42 @@ module ethos::checker_board {
             assert!(to_row < from_row, EBAD_DESTINATION);
         };
 
-        assert!(from_col + 1 == to_col || from_col == to_col + 1, EBAD_DESTINATION);
-
         assert!(option::contains(new_space, &EMPTY), EOCCUPIED_SPACE);
 
-        true
+        let jump = (player1_move && from_row + 2 == to_row) || 
+                   (player2_move && from_row - 2 == to_row);
+
+        if (jump) {
+            let over_row = from_row + 1;
+            let over_col = from_col + 1;
+            let over_piece = PLAYER2;
+
+            if (player2_move) {
+                over_row = from_row - 1;
+                over_piece = PLAYER1;
+            };
+            
+            if (from_col > to_col) {
+                over_col = from_col - 1;
+            };
+            
+            assert!(piece_at(board, over_row, over_col) == &over_piece, EBAD_JUMP);
+
+            let over_position = SpacePosition {
+                row: over_row,
+                column: over_col
+            };
+            vector::push_back(&mut move_effects.jumps, over_position);
+        } else {
+            if (player1_move) {
+                assert!(from_row + 1 == to_row, EBAD_DESTINATION);
+            } else {
+                assert!(from_row - 1 == to_row, EBAD_DESTINATION);
+            };
+            assert!(from_col + 1 == to_col || from_col == to_col + 1, EBAD_DESTINATION);
+        };
+
+        move_effects
     }
 
 }
