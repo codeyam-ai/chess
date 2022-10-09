@@ -18,8 +18,9 @@ module ethos::checker_board {
     const COLUMN_COUNT: u64 = 8;
     const PLAYER_PIECES: u64 = 12;
 
-    const EEmptySpace: u64 = 0;
-    const EBadDestination: u64 = 1;
+    const EEMPTY_SPACE: u64 = 0;
+    const EBAD_DESTINATION: u64 = 1;
+    const EOCCUPIED_SPACE: u64 = 2;
     
     struct CheckerBoard has store, copy {
         spaces: vector<vector<Option<u8>>>,
@@ -73,17 +74,20 @@ module ethos::checker_board {
         
         let player1_move = option::contains(old_space, &PLAYER1);
         let player2_move = option::contains(old_space, &PLAYER2);
-        assert!(player1_move || player2_move, EEmptySpace);
+        assert!(player1_move || player2_move, EEMPTY_SPACE);
         
         let piece = option::swap(old_space, EMPTY);
         
         if (player1_move) {
-            assert!(to_row > from_row, EBadDestination);
+            assert!(to_row > from_row, EBAD_DESTINATION);
         } else {
-            assert!(to_row < from_row, EBadDestination);
+            assert!(to_row < from_row, EBAD_DESTINATION);
         };
 
         let new_space = space_at_mut(board, to_row, to_col);
+
+        assert!(option::contains(new_space, &EMPTY), EOCCUPIED_SPACE);
+
         option::swap(new_space, piece);
 
         true

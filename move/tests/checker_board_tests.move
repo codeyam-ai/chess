@@ -66,4 +66,15 @@ module ethos::checker_board_tests {
 
         transfer::share_object(TestCheckerBoard { board });
     }
+
+    #[test]
+    #[expected_failure(abort_code = 2)]
+    fun test_modify_occupied_space() {
+        use ethos::checker_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, 6, 1, 5, 2);
+
+        transfer::share_object(TestCheckerBoard { board });
+    }
 }
