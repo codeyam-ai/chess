@@ -117,11 +117,13 @@ module ethos::checkers {
     }
 
     public entry fun make_move(game: &mut CheckersGame, fromRow: u64, fromColumn: u64, toRow: u64, toColumn: u64, ctx: &mut TxContext) {
+        let player = tx_context::sender(ctx);     
+        assert!(game.current_player == player, EINVALID_PLAYER);
+
         let board = current_board_mut(game);
         
         checker_board::modify(board, fromRow, fromColumn, toRow, toColumn);
-
-        let player = tx_context::sender(ctx);     
+        
         if (player == game.player1) {
             game.current_player = *&game.player2;
         } else {

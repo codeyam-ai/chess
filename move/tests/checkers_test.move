@@ -8,6 +8,7 @@ module ethos::checkers_tests {
    
     const PLAYER1: address = @0xCAFE;
     const PLAYER2: address = @0xA1C05;
+    const NONPLAYER: address = @0xFACE;
 
     #[test]
     fun test_game_create() {
@@ -97,13 +98,61 @@ module ethos::checkers_tests {
         };
     }
 
-    // #[test]
-    // fun test_aborts_if_wrong_player_tries_to_move() {
-    // }
+    #[test]
+    #[expected_failure(abort_code = 0)]
+    fun test_aborts_if_wrong_player_tries_to_move() {
+        use ethos::checkers::{create_game, make_move, piece_at, current_player};
 
-    // #[test]
-    // fun test_aborts_if_non_player_tries_to_move() {
-    // }
+        let scenario = &mut test_scenario::begin(&PLAYER1);
+        {
+            create_game(PLAYER2, test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, &PLAYER1);
+        {
+            let game_wrapper = test_scenario::take_shared<CheckersGame>(scenario);
+            let game = test_scenario::borrow_mut(&mut game_wrapper);      
+
+            make_move(game, 2, 1, 3, 2, test_scenario::ctx(scenario));
+
+            test_scenario::return_shared<CheckersGame>(scenario, game_wrapper);
+        };
+
+        test_scenario::next_tx(scenario, &PLAYER1);
+        {
+            let game_wrapper = test_scenario::take_shared<CheckersGame>(scenario);
+            let game = test_scenario::borrow_mut(&mut game_wrapper);
+
+            assert!(piece_at(game, 2, 1) == &0, (*piece_at(game, 2, 1) as u64));
+            assert!(piece_at(game, 3, 2) == &1, (*piece_at(game, 3, 2) as u64));
+            assert!(current_player(game) == &PLAYER2, 1);
+
+            make_move(game, 5, 4, 4, 3, test_scenario::ctx(scenario));
+
+            test_scenario::return_shared<CheckersGame>(scenario, game_wrapper);
+        };
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 0)]
+    fun test_aborts_if_non_player_tries_to_move() {
+        use ethos::checkers::{create_game, make_move};
+
+        let scenario = &mut test_scenario::begin(&PLAYER1);
+        {
+            create_game(PLAYER2, test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, &NONPLAYER);
+        {
+            let game_wrapper = test_scenario::take_shared<CheckersGame>(scenario);
+            let game = test_scenario::borrow_mut(&mut game_wrapper);      
+
+            make_move(game, 2, 1, 3, 2, test_scenario::ctx(scenario));
+
+            test_scenario::return_shared<CheckersGame>(scenario, game_wrapper);
+        };
+    }
 
     // #[test]
     // fun test_game_over() {
