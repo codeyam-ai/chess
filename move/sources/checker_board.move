@@ -84,6 +84,8 @@ module ethos::checker_board {
             assert!(to_row < from_row, EBAD_DESTINATION);
         };
 
+        assert!(from_col + 1 == to_col || from_col == to_col + 1, EBAD_DESTINATION);
+
         let new_space = space_at_mut(board, to_row, to_col);
 
         assert!(option::contains(new_space, &EMPTY), EOCCUPIED_SPACE);

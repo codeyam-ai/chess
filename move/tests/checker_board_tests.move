@@ -77,4 +77,26 @@ module ethos::checker_board_tests {
 
         transfer::share_object(TestCheckerBoard { board });
     }
+
+    #[test]
+    #[expected_failure(abort_code = 1)]
+    fun test_modify_destination_not_allowed_player_1() {
+        use ethos::checker_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, 2, 1, 3, 6);
+
+        transfer::share_object(TestCheckerBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 1)]
+    fun test_modify_destination_not_allowed_player_2() {
+        use ethos::checker_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, 5, 0, 4, 3);
+
+        transfer::share_object(TestCheckerBoard { board });
+    }
 }
