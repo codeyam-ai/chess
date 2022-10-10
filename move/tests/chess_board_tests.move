@@ -4,16 +4,17 @@ module ethos::chess_board_tests {
     use ethos::chess_board::{ChessBoard};
     use sui::transfer;
 
+    const EMPTY: u8 = 0;
+
     const PLAYER1: u8 = 1;
     const PLAYER2: u8 = 2;
-
-    const EMPTY: u8 = 0;
-    const QUEEN: u8 = 1;
-    const KING: u8 = 2;
-    const ROOK: u8 = 3;
+   
+    const PAWN: u8 = 1;
+    const ROOK: u8 = 2;
+    const KNIGHT: u8 = 3;
     const BISHOP: u8 = 4;
-    const KNIGHT: u8 = 5;
-    const PAWN: u8 = 6;
+    const KING: u8 = 5;
+    const QUEEN: u8 = 6;
 
     struct TestChessBoard has key {
         board: ChessBoard

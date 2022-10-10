@@ -175,6 +175,12 @@ module ethos::chess {
         chess_board::piece_at(board, row, column)
     }
 
+    public fun piece_at_access(game: &ChessGame, row: u64, column: u64): (u8, u8) {
+        let board = current_board(game);
+        chess_board::piece_at_access(board, row, column)
+    }
+
+
     public fun current_player(game: &ChessGame): &address {
         &game.current_player
     }

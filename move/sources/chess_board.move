@@ -11,16 +11,17 @@ module ethos::chess_board {
     friend ethos::chess_tests;
 
     const EMPTY: u8 = 0;
+    
     const PLAYER1: u8 = 1;
     const PLAYER2: u8 = 2;
 
-    const QUEEN: u8 = 1;
-    const KING: u8 = 2;
-    const ROOK: u8 = 3;
+    const PAWN: u8 = 1;
+    const ROOK: u8 = 2;
+    const KNIGHT: u8 = 3;
     const BISHOP: u8 = 4;
-    const KNIGHT: u8 = 5;
-    const PAWN: u8 = 6;
-
+    const KING: u8 = 5;
+    const QUEEN: u8 = 6;
+    
     const ROW_COUNT: u64 = 8;
     const COLUMN_COUNT: u64 = 8;
 
