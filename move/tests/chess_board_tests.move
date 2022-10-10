@@ -143,4 +143,19 @@ module ethos::chess_board_tests {
         transfer::share_object(TestChessBoard { board });
     }
 
+    #[test]
+    fun test_modify_capture_piece() {
+        use ethos::chess_board::{new, modify, empty_space_count};
+
+        let board = new();
+        modify(&mut board, PLAYER1, 0, 1, 2, 2);
+        modify(&mut board, PLAYER1, 2, 2, 4, 3);
+
+        assert!(empty_space_count(&board) == 32, empty_space_count(&board));
+        modify(&mut board, PLAYER1, 4, 3, 6, 4);
+        assert!(empty_space_count(&board) == 33, empty_space_count(&board));
+        
+        transfer::share_object(TestChessBoard { board });
+    }
+
 }

@@ -105,6 +105,16 @@ module ethos::chess_board {
         assert!(piece.player_number == player_number, EWRONG_PLAYER);
 
         let new_space = space_at_mut(board, to_row, to_col);
+
+        if (option::is_some(new_space)) {
+            let chess_piece = option::borrow(new_space);
+
+            if (chess_piece.player_number != player_number) {
+                option::swap(new_space, piece);
+                return true
+            }
+        };
+        
         assert!(option::is_none(new_space), EOCCUPIED_SPACE);
         option::fill(new_space, piece);
 
