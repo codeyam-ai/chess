@@ -158,4 +158,31 @@ module ethos::chess_board_tests {
         transfer::share_object(TestChessBoard { board });
     }
 
+    #[test]
+    #[expected_failure(abort_code = 4)]
+    fun test_modify_bad_off_board_move_bottom() {
+        use ethos::chess_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, PLAYER1, 0, 6, 2, 7);
+        modify(&mut board, PLAYER1, 2, 7, 4, 8);
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 4)]
+    fun test_modify_bad_off_board_move_right() {
+        use ethos::chess_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, PLAYER1, 0, 6, 2, 7);
+        modify(&mut board, PLAYER1, 2, 7, 4, 6);
+        modify(&mut board, PLAYER1, 4, 6, 6, 7);
+        modify(&mut board, PLAYER1, 6, 7, 8, 6);
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+
 }

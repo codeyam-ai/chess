@@ -28,6 +28,7 @@ module ethos::chess_board {
     const EWRONG_PLAYER: u64 = 1;
     const EBAD_DESTINATION: u64 = 2;
     const EOCCUPIED_SPACE: u64 = 3;
+    const EOFF_BOARD: u64 = 4;
     
     struct ChessBoard has store, copy {
         spaces: vector<vector<Option<ChessPiece>>>,
@@ -98,6 +99,8 @@ module ethos::chess_board {
     }
 
     public(friend) fun modify(board: &mut ChessBoard, player_number: u8, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
+        assert!(to_row < ROW_COUNT && to_col < COLUMN_COUNT, EOFF_BOARD);
+        
         let old_space = space_at_mut(board, from_row, from_col);
         assert!(option::is_some(old_space), EEMPTY_SPACE);
         
