@@ -22,8 +22,9 @@ module ethos::chess_board {
     const COLUMN_COUNT: u64 = 8;
 
     const EEMPTY_SPACE: u64 = 0;
-    const EBAD_DESTINATION: u64 = 1;
-    const EOCCUPIED_SPACE: u64 = 2;
+    const EWRONG_PLAYER: u64 = 1;
+    const EBAD_DESTINATION: u64 = 2;
+    const EOCCUPIED_SPACE: u64 = 3;
     
     struct CheckerBoard has store, copy {
         spaces: vector<vector<Option<u8>>>,

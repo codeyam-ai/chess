@@ -66,11 +66,22 @@ module ethos::chess_board_tests {
 
     #[test]
     #[expected_failure(abort_code = 0)]
-    fun test_modify_bad_from() {
+    fun test_modify_bad_from_empty() {
         use ethos::chess_board::{new, modify};
 
         let board = new();
         modify(&mut board, 2, 1, 3, 1);
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 1)]
+    fun test_modify_bad_from_wrong_player() {
+        use ethos::chess_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, 6, 1, 5, 1);
 
         transfer::share_object(TestChessBoard { board });
     }
