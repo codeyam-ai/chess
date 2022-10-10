@@ -11,6 +11,9 @@ module ethos::chess_board {
     friend ethos::chess_tests;
 
     const EMPTY: u8 = 0;
+    const PLAYER1: u8 = 1;
+    const PLAYER2: u8 = 2;
+
     const QUEEN: u8 = 1;
     const KING: u8 = 2;
     const ROOK: u8 = 3;
@@ -26,9 +29,14 @@ module ethos::chess_board {
     const EBAD_DESTINATION: u64 = 2;
     const EOCCUPIED_SPACE: u64 = 3;
     
-    struct CheckerBoard has store, copy {
-        spaces: vector<vector<Option<u8>>>,
+    struct ChessBoard has store, copy {
+        spaces: vector<vector<Option<ChessPiece>>>,
         game_over: bool
+    }
+
+    struct ChessPiece has store, copy, drop {
+        type: u8,
+        player_number: u8
     }
 
     struct SpacePosition has copy, drop {
@@ -40,7 +48,7 @@ module ethos::chess_board {
         jumps: vector<SpacePosition>
     }
 
-    public(friend) fun new(): CheckerBoard {
+    public(friend) fun new(): ChessBoard {
         let spaces = vector[];
 
         let i=0;
@@ -51,20 +59,26 @@ module ethos::chess_board {
             while (j < COLUMN_COUNT) {
                 if (i == 0 || i == 7) {
                     if (j == 0 || j == 7) {
-                        vector::push_back(&mut row, option::some(ROOK));
+                        let piece = create_piece(ROOK, i==0);
+                        vector::push_back(&mut row, option::some(piece));
                     } else if (j == 1 || j == 6) {
-                        vector::push_back(&mut row, option::some(KNIGHT));
+                        let piece = create_piece(KNIGHT, i==0);
+                        vector::push_back(&mut row, option::some(piece));
                     } else if (j == 2 || j == 5) {
-                        vector::push_back(&mut row, option::some(BISHOP));
+                        let piece = create_piece(BISHOP, i==0);
+                        vector::push_back(&mut row, option::some(piece));
                     } else if (j == 3) {
-                        vector::push_back(&mut row, option::some(KING));
+                        let piece = create_piece(KING, i==0);
+                        vector::push_back(&mut row, option::some(piece));
                     } else if (j == 4) {
-                        vector::push_back(&mut row, option::some(QUEEN));
+                        let piece = create_piece(QUEEN, i==0);
+                        vector::push_back(&mut row, option::some(piece));
                     }
                 } else if (i == 1 || i == 6) {
-                    vector::push_back(&mut row, option::some(PAWN));
+                    let piece = create_piece(PAWN, i==1);
+                    vector::push_back(&mut row, option::some(piece));
                 } else {
-                    vector::push_back(&mut row, option::some(EMPTY));
+                    vector::push_back(&mut row, option::none());
                 };
 
                 j = j + 1;
@@ -75,7 +89,7 @@ module ethos::chess_board {
             i = i + 1;
         };
 
-        let game_board = CheckerBoard { 
+        let game_board = ChessBoard { 
             spaces, 
             game_over: false
         };
@@ -83,14 +97,16 @@ module ethos::chess_board {
         game_board 
     }
 
-    public(friend) fun modify(board: &mut CheckerBoard, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
+    public(friend) fun modify(board: &mut ChessBoard, player_number: u8, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
         let old_space = space_at_mut(board, from_row, from_col);
-        let piece = option::swap(old_space, EMPTY);
-
-        assert!(piece != EMPTY, EEMPTY_SPACE);
+        assert!(option::is_some(old_space), EEMPTY_SPACE);
+        
+        let piece = option::extract(old_space);
+        assert!(piece.player_number == player_number, EWRONG_PLAYER);
 
         let new_space = space_at_mut(board, to_row, to_col);
-        option::swap(new_space, piece);
+        assert!(option::is_none(new_space), EOCCUPIED_SPACE);
+        option::fill(new_space, piece);
 
         true
     }
@@ -103,29 +119,43 @@ module ethos::chess_board {
         COLUMN_COUNT
     }
 
-    fun spaces_at(spaces: &vector<vector<Option<u8>>>, row_index: u64, column_index: u64): &Option<u8> {
+    fun spaces_at(spaces: &vector<vector<Option<ChessPiece>>>, row_index: u64, column_index: u64): &Option<ChessPiece> {
         let row = vector::borrow(spaces, row_index);
         vector::borrow(row, column_index)
     }
 
-    fun spaces_at_mut(spaces: &mut vector<vector<Option<u8>>>, row_index: u64, column_index: u64): &mut Option<u8> {
+    fun spaces_at_mut(spaces: &mut vector<vector<Option<ChessPiece>>>, row_index: u64, column_index: u64): &mut Option<ChessPiece> {
         let row = vector::borrow_mut(spaces, row_index);
         vector::borrow_mut(row, column_index)
     }
 
-    public(friend) fun space_at(board: &CheckerBoard, row_index: u64, column_index: u64): &Option<u8> {
+    public(friend) fun space_at(board: &ChessBoard, row_index: u64, column_index: u64): &Option<ChessPiece> {
         spaces_at(&board.spaces, row_index, column_index)
     }
 
-    public(friend) fun space_at_mut(board: &mut CheckerBoard, row_index: u64, column_index: u64): &mut Option<u8> {
+    public(friend) fun space_at_mut(board: &mut ChessBoard, row_index: u64, column_index: u64): &mut Option<ChessPiece> {
         spaces_at_mut(&mut board.spaces, row_index, column_index)
     }
 
-    public(friend) fun piece_at(board: &CheckerBoard, row: u64, column: u64): &u8 {
-        option::borrow(space_at(board, row, column))
+    public(friend) fun piece_at(board: &ChessBoard, row: u64, column: u64): ChessPiece {
+        let option = space_at(board, row, column);
+        
+        if (option::is_none(option)) {
+            return ChessPiece { 
+                type: EMPTY, 
+                player_number: EMPTY
+            }
+        };
+
+        *option::borrow(option)
     }
 
-    public(friend) fun empty_space_positions(game_board: &CheckerBoard): vector<SpacePosition> {
+    public(friend) fun piece_at_access(board: &ChessBoard, row: u64, column: u64): (u8, u8) {
+        let piece = piece_at(board, row, column);
+        (piece.type, piece.player_number)
+    }
+
+    public(friend) fun empty_space_positions(game_board: &ChessBoard): vector<SpacePosition> {
         let empty_spaces = vector<SpacePosition>[];
 
         let row = 0;
@@ -133,7 +163,7 @@ module ethos::chess_board {
             let column = 0;
             while (column < COLUMN_COUNT) {
                 let space = space_at(game_board, row, column);
-                if (option::contains(space, &EMPTY)) {
+                if (option::is_none(space)) {
                     vector::push_back(&mut empty_spaces, SpacePosition { row, column })
                 };
                 column = column + 1;
@@ -144,12 +174,23 @@ module ethos::chess_board {
         empty_spaces
     }
 
-    public(friend) fun empty_space_count(game_board: &CheckerBoard): u64 {
+    public(friend) fun empty_space_count(game_board: &ChessBoard): u64 {
         vector::length(&empty_space_positions(game_board))
     }
 
+    fun create_piece(type: u8, player_1: bool): ChessPiece {
+        let player_number = PLAYER1;
+        if (!player_1) {
+            player_number = PLAYER2;
+        };
+        ChessPiece {
+            type,
+            player_number
+        }
+    }
 
-    // fun analyze_move(board: &CheckerBoard, piece: &u8, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
+
+    // fun analyze_move(board: &ChessBoard, piece: &u8, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
     //     assert!(to_row < ROW_COUNT, EBAD_DESTINATION);
     //     assert!(to_col < COLUMN_COUNT, EBAD_DESTINATION);
         

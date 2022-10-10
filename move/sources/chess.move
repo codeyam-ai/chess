@@ -7,7 +7,7 @@ module ethos::chess {
     use sui::transfer;
     use std::vector;
     use std::option::{Self, Option};
-    use ethos::chess_board::{Self, CheckerBoard};
+    use ethos::chess_board::{Self, ChessBoard, ChessPiece};
 
     const EINVALID_PLAYER: u64 = 0;
     const PLAYER1: u8 = 1;
@@ -21,7 +21,7 @@ module ethos::chess {
         player1: address,
         player2: address,
         moves: vector<ChessMove>,
-        boards: vector<CheckerBoard>,
+        boards: vector<ChessBoard>,
         current_player: address,
         winner: Option<address>
     }
@@ -72,7 +72,7 @@ module ethos::chess {
         
         let name = string::utf8(b"Ethos Chess");
         let description = string::utf8(b"Chess - built on Sui  - by Ethos");
-        let url = url::new_unsafe_from_bytes(b"https://CheckerBoard.png");
+        let url = url::new_unsafe_from_bytes(b"https://ChessBoard.png");
         
         let game = ChessGame {
             id: game_uid,
@@ -120,9 +120,14 @@ module ethos::chess {
         let player = tx_context::sender(ctx);     
         assert!(game.current_player == player, EINVALID_PLAYER);
 
+        let player_number = PLAYER1; 
+        if (player == game.player2) {
+            player_number = PLAYER2;
+        };
+
         let board = current_board_mut(game);
         
-         chess_board::modify(board, from_row, from_column, to_row, to_column);
+        chess_board::modify(board, player_number, from_row, from_column, to_row, to_column);
         
         if (player == game.player1) {
             game.current_player = *&game.player2;
@@ -147,25 +152,25 @@ module ethos::chess {
         vector::length(&game.moves)
     }
 
-    public fun board_at(game: &ChessGame, index: u64): &CheckerBoard {
+    public fun board_at(game: &ChessGame, index: u64): &ChessBoard {
         vector::borrow(&game.boards, index)
     }
 
-    public fun board_at_mut(game: &mut ChessGame, index: u64): &mut CheckerBoard {
+    public fun board_at_mut(game: &mut ChessGame, index: u64): &mut ChessBoard {
         vector::borrow_mut(&mut game.boards, index)
     }
 
-    public fun current_board(game: &ChessGame): &CheckerBoard {
+    public fun current_board(game: &ChessGame): &ChessBoard {
         let last_board_index = vector::length(&game.boards) - 1;
         board_at(game, last_board_index)
     }
 
-    public fun current_board_mut(game: &mut ChessGame): &mut CheckerBoard {
+    public fun current_board_mut(game: &mut ChessGame): &mut ChessBoard {
         let last_board_index = vector::length(&game.boards) - 1;
         board_at_mut(game, last_board_index)
     }
 
-    public fun piece_at(game: &ChessGame, row: u64, column: u64): &u8 {
+    public fun piece_at(game: &ChessGame, row: u64, column: u64): ChessPiece {
         let board = current_board(game);
         chess_board::piece_at(board, row, column)
     }

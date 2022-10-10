@@ -1,8 +1,11 @@
 
 #[test_only]
 module ethos::chess_board_tests {
-    use ethos::chess_board::{CheckerBoard};
+    use ethos::chess_board::{ChessBoard};
     use sui::transfer;
+
+    const PLAYER1: u8 = 1;
+    const PLAYER2: u8 = 2;
 
     const EMPTY: u8 = 0;
     const QUEEN: u8 = 1;
@@ -13,12 +16,12 @@ module ethos::chess_board_tests {
     const PAWN: u8 = 6;
 
     struct TestChessBoard has key {
-        board: CheckerBoard
+        board: ChessBoard
     }
 
     #[test]
     fun test_new() {
-        use ethos::chess_board::{new, row_count, column_count, empty_space_count, piece_at};
+        use ethos::chess_board::{new, row_count, column_count, empty_space_count, piece_at_access};
 
         let board = new();
         assert!(row_count() == 8, row_count());
@@ -26,40 +29,72 @@ module ethos::chess_board_tests {
         let empty_space_count = empty_space_count(&board);
         assert!(empty_space_count == 32, empty_space_count);
         
-        let pawn = piece_at(&board, 1, 0);
-        assert!(pawn == &PAWN, (*pawn as u64));
-        let knight = piece_at(&board, 0, 1);
-        assert!(knight == &KNIGHT, (*knight as u64));
-        let rook = piece_at(&board, 0, 0);
-        assert!(rook == &ROOK, (*rook as u64));
-        let king = piece_at(&board, 0, 3);
-        assert!(king == &KING, (*king as u64));
-        let queen = piece_at(&board, 0, 4);
-        assert!(queen == &QUEEN, (*queen as u64));
+        let (type, player_number) = piece_at_access(&board, 1, 0);
+        assert!(type == PAWN, (type as u64));
+        assert!(player_number == PLAYER1, (player_number as u64));
 
-        let pawn = piece_at(&board, 6, 0);
-        assert!(pawn == &PAWN, (*pawn as u64));
-        let knight = piece_at(&board, 7, 1);
-        assert!(knight == &KNIGHT, (*knight as u64));
-        let rook = piece_at(&board, 7, 0);
-        assert!(rook == &ROOK, (*rook as u64));
-        let king = piece_at(&board, 7, 3);
-        assert!(king == &KING, (*king as u64));
-        let queen = piece_at(&board, 7, 4);
-        assert!(queen == &QUEEN, (*queen as u64));
+        let (type, player_number) = piece_at_access(&board, 0, 0);
+        assert!(type == ROOK, (type as u64));
+        assert!(player_number == PLAYER1, (player_number as u64));
+
+        let (type, player_number) = piece_at_access(&board, 0, 1);
+        assert!(type == KNIGHT, (type as u64));
+        assert!(player_number == PLAYER1, (player_number as u64));
+
+        let (type, player_number) = piece_at_access(&board, 0, 2);
+        assert!(type == BISHOP, (type as u64));
+        assert!(player_number == PLAYER1, (player_number as u64));
+
+        let (type, player_number) = piece_at_access(&board, 0, 3);
+        assert!(type == KING, (type as u64));
+        assert!(player_number == PLAYER1, (player_number as u64));
+
+        let (type, player_number) = piece_at_access(&board, 0, 4);
+        assert!(type == QUEEN, (type as u64));
+        assert!(player_number == PLAYER1, (player_number as u64));
+
+
+        let (type, player_number) = piece_at_access(&board, 6, 0);
+        assert!(type == PAWN, (type as u64));
+        assert!(player_number == PLAYER2, (player_number as u64));
+
+        let (type, player_number) = piece_at_access(&board, 7, 0);
+        assert!(type == ROOK, (type as u64));
+        assert!(player_number == PLAYER2, (player_number as u64));
+
+        let (type, player_number) = piece_at_access(&board, 7, 1);
+        assert!(type == KNIGHT, (type as u64));
+        assert!(player_number == PLAYER2, (player_number as u64));
+
+        let (type, player_number) = piece_at_access(&board, 7, 2);
+        assert!(type == BISHOP, (type as u64));
+        assert!(player_number == PLAYER2, (player_number as u64));
+
+        let (type, player_number) = piece_at_access(&board, 7, 3);
+        assert!(type == KING, (type as u64));
+        assert!(player_number == PLAYER2, (player_number as u64));
+
+        let (type, player_number) = piece_at_access(&board, 7, 4);
+        assert!(type == QUEEN, (type as u64));
+        assert!(player_number == PLAYER2, (player_number as u64));
 
         transfer::share_object(TestChessBoard { board })
     }
 
     #[test]
     fun test_modify() {
-        use ethos::chess_board::{new, modify, piece_at};
+        use ethos::chess_board::{new, modify, piece_at_access};
 
         let board = new();
-        modify(&mut board, 1, 1, 2, 1);
+        modify(&mut board, PLAYER1, 1, 1, 2, 1);
 
-        assert!(piece_at(&board, 1, 1) == &EMPTY, (*piece_at(&board, 1, 1) as u64));
-        assert!(piece_at(&board, 2, 1) == &PAWN, (*piece_at(&board, 2, 1) as u64));
+        let (type, player_number) = piece_at_access(&board, 1, 1);
+        assert!(type == EMPTY, (type as u64));
+        assert!(player_number == EMPTY, (player_number as u64));
+        
+        let (type, player_number) = piece_at_access(&board, 2, 1);
+        assert!(type == PAWN, (type as u64));
+        assert!(player_number == PLAYER1, (player_number as u64));
 
         transfer::share_object(TestChessBoard { board });
     }
@@ -70,21 +105,42 @@ module ethos::chess_board_tests {
         use ethos::chess_board::{new, modify};
 
         let board = new();
-        modify(&mut board, 2, 1, 3, 1);
+        modify(&mut board, PLAYER1, 2, 1, 3, 1);
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 3)]
+    fun test_modify_bad_space_occupied() {
+        use ethos::chess_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, PLAYER1, 0, 0, 0, 1);
 
         transfer::share_object(TestChessBoard { board });
     }
 
     #[test]
     #[expected_failure(abort_code = 1)]
-    fun test_modify_bad_from_wrong_player() {
+    fun test_modify_bad_from_wrong_player_player1() {
         use ethos::chess_board::{new, modify};
 
         let board = new();
-        modify(&mut board, 6, 1, 5, 1);
+        modify(&mut board, PLAYER2, 1, 1, 2, 1);
 
         transfer::share_object(TestChessBoard { board });
     }
 
-    
+    #[test]
+    #[expected_failure(abort_code = 1)]
+    fun test_modify_bad_from_wrong_player_player2() {
+        use ethos::chess_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, PLAYER1, 6, 1, 5, 1);
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
 }
