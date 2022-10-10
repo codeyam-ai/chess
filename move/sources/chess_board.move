@@ -85,9 +85,15 @@ module ethos::chess_board {
         game_board 
     }
 
-    // public(friend) fun modify(board: &mut CheckerBoard, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
-        
-    // }
+    public(friend) fun modify(board: &mut CheckerBoard, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
+        let old_space = space_at_mut(board, from_row, from_col);
+        let piece = option::swap(old_space, EMPTY);
+
+        let new_space = space_at_mut(board, to_row, to_col);
+        option::swap(new_space, piece);
+
+        true
+    }
     
     public fun row_count(): u64 {
         ROW_COUNT
