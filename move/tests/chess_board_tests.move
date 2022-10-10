@@ -209,6 +209,18 @@ module ethos::chess_board_tests {
 
     #[test]
     #[expected_failure(abort_code = 2)]
+    fun test_modify_bad_pawn_move_3() {
+        use ethos::chess_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, PLAYER2, 6, 1, 5, 1);
+        modify(&mut board, PLAYER2, 5, 1, 6, 1);
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 2)]
     fun test_modify_bad_rook_move() {
         use ethos::chess_board::{new, modify};
 
@@ -255,6 +267,39 @@ module ethos::chess_board_tests {
         modify(&mut board, PLAYER1, 3, 3, 4, 3);
         modify(&mut board, PLAYER1, 0, 3, 1, 3);
         modify(&mut board, PLAYER1, 1, 3, 3, 3);
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 2)]
+    fun test_modify_bad_queen_move() {
+        use ethos::chess_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 4, 2, 4);
+        modify(&mut board, PLAYER1, 2, 4, 3, 4);
+        modify(&mut board, PLAYER1, 3, 4, 4, 4);
+        modify(&mut board, PLAYER1, 0, 4, 1, 4);
+        modify(&mut board, PLAYER1, 1, 4, 3, 3);
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    fun test_modify_queen_diagonal_move() {
+        use ethos::chess_board::{new, modify, piece_at_access};
+
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 4, 2, 4);
+        modify(&mut board, PLAYER1, 2, 4, 3, 4);
+        modify(&mut board, PLAYER1, 3, 4, 4, 4);
+        modify(&mut board, PLAYER1, 0, 4, 1, 4);
+        modify(&mut board, PLAYER1, 1, 4, 4, 1);
+
+        let (type, player_number) = piece_at_access(&board, 4, 1);
+        assert!(type == QUEEN, (type as u64));
+        assert!(player_number == PLAYER1, (PLAYER1 as u64));
 
         transfer::share_object(TestChessBoard { board });
     }

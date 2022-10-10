@@ -236,11 +236,25 @@ module ethos::chess_board {
             ) {
                 return true
             }
-        } else {
-            return true
+        } else if (piece.type == QUEEN) {
+            if (from_row == to_row || from_col == to_col) {
+                return true
+            } else {
+                let row_diff = abs_subtract(from_row, to_row);
+                let col_diff = abs_subtract(from_col, to_col);
+                return row_diff == col_diff
+            }
         };
         
         false
+    }
+
+    fun abs_subtract(value1: u64, value2: u64): u64 {
+        if (value1 >= value2) {
+            return value1 - value2
+        } else {
+            return value2 - value1
+        }
     }
 
 }
