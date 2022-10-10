@@ -64,16 +64,16 @@ module ethos::chess_board_tests {
         transfer::share_object(TestChessBoard { board });
     }
 
-    // #[test]
-    // #[expected_failure(abort_code = 0)]
-    // fun test_modify_bad_from() {
-    //     use ethos::chess_board::{new, modify};
+    #[test]
+    #[expected_failure(abort_code = 0)]
+    fun test_modify_bad_from() {
+        use ethos::chess_board::{new, modify};
 
-    //     let board = new();
-    //     modify(&mut board, 3, 2, 4, 1);
+        let board = new();
+        modify(&mut board, 2, 1, 3, 1);
 
-    //     transfer::share_object(TestChessBoard { board });
-    // }
+        transfer::share_object(TestChessBoard { board });
+    }
 
     
 }

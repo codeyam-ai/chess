@@ -122,16 +122,13 @@ module ethos::chess {
 
         let board = current_board_mut(game);
         
-        std::debug::print(board);
-        std::debug::print(&vector[from_row, from_column, to_row, to_column]);
-        // chess_board::modify(board, fromRow, fromColumn, toRow, toColumn);
+         chess_board::modify(board, from_row, from_column, to_row, to_column);
         
         if (player == game.player1) {
             game.current_player = *&game.player2;
         } else {
             game.current_player = *&game.player1;
         }
-        
     }
 
     public fun game_id(game: &ChessGame): &UID {

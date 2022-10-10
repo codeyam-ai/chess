@@ -42,7 +42,6 @@ module ethos::chess_board {
     public(friend) fun new(): CheckerBoard {
         let spaces = vector[];
 
-        let x = 0;
         let i=0;
         while (i < ROW_COUNT) {
             let row = vector[];
@@ -75,8 +74,6 @@ module ethos::chess_board {
             i = i + 1;
         };
 
-        std::debug::print(&x);
-
         let game_board = CheckerBoard { 
             spaces, 
             game_over: false
@@ -88,6 +85,8 @@ module ethos::chess_board {
     public(friend) fun modify(board: &mut CheckerBoard, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
         let old_space = space_at_mut(board, from_row, from_col);
         let piece = option::swap(old_space, EMPTY);
+
+        assert!(piece != EMPTY, EEMPTY_SPACE);
 
         let new_space = space_at_mut(board, to_row, to_col);
         option::swap(new_space, piece);
@@ -128,22 +127,18 @@ module ethos::chess_board {
     public(friend) fun empty_space_positions(game_board: &CheckerBoard): vector<SpacePosition> {
         let empty_spaces = vector<SpacePosition>[];
 
-        let x = 0;
         let row = 0;
         while (row < ROW_COUNT) {
             let column = 0;
             while (column < COLUMN_COUNT) {
                 let space = space_at(game_board, row, column);
                 if (option::contains(space, &EMPTY)) {
-                    x = x + 1;
                     vector::push_back(&mut empty_spaces, SpacePosition { row, column })
                 };
                 column = column + 1;
             };
             row = row + 1;
         };
-
-        std::debug::print(&x);
 
         empty_spaces
     }
