@@ -213,6 +213,13 @@ module ethos::chess_board {
                     return true
                 }
             }
+        } else if (piece.type == ROOK) {
+            if (
+                (from_row == to_row && from_col != to_col) ||
+                (from_row != to_row && from_col == to_col)
+            ) {
+                return true
+            }
         } else if (piece.type == KNIGHT) {
             if (
                 (from_row + 2 == to_row && (from_col + 1 == to_col || from_col == to_col + 1)) ||
