@@ -51,18 +51,18 @@ module ethos::chess_board_tests {
         transfer::share_object(TestChessBoard { board })
     }
 
-    // #[test]
-    // fun test_modify() {
-    //     use ethos::chess_board::{new, modify, piece_at};
+    #[test]
+    fun test_modify() {
+        use ethos::chess_board::{new, modify, piece_at};
 
-    //     let board = new();
-    //     modify(&mut board, 2, 1, 3, 2);
+        let board = new();
+        modify(&mut board, 1, 1, 2, 1);
 
-    //     assert!(piece_at(&board, 2, 1) == &0, (*piece_at(&board, 2, 1) as u64));
-    //     assert!(piece_at(&board, 3, 2) == &1, (*piece_at(&board, 3, 2) as u64));
+        assert!(piece_at(&board, 1, 1) == &EMPTY, (*piece_at(&board, 1, 1) as u64));
+        assert!(piece_at(&board, 2, 1) == &PAWN, (*piece_at(&board, 2, 1) as u64));
 
-    //     transfer::share_object(TestChessBoard { board });
-    // }
+        transfer::share_object(TestChessBoard { board });
+    }
 
     // #[test]
     // #[expected_failure(abort_code = 0)]
