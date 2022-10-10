@@ -11,7 +11,6 @@ const board = require('./board');
 const queue = require('./queue');
 
 let moves = {};
-let preapproval;
 
 const constructTransaction = (direction, activeGameAddress) => {
   return {
@@ -25,33 +24,6 @@ const constructTransaction = (direction, activeGameAddress) => {
     ],
     gasBudget: 20000
   }
-}
-
-const checkPreapprovals = async (activeGameAddress, walletSigner) => {
-  // if (preapproval === undefined) {
-    try {
-      const result = await ethos.requestPreapproval({
-        signer: walletSigner,
-        preapproval: {
-          packageObjectId: contractAddress,
-          objectId: activeGameAddress,
-          module: 'game_8192',
-          function: 'make_move',
-          description: "Pre-approve moves in the game so you can play without signing every transaction.",
-          totalGasLimit: 250000,
-          perTransactionGasLimit: 5000,
-          maxTransactionCount: 20
-        }
-      })
-
-      preapproval = result.approved;
-    } catch (e) {
-      console.log("Error requesting preapproval", e);
-      preapproval = false;
-    }
-  // }
-  
-  return preapproval;
 }
 
 const load = async (walletSigner, activeGameAddress, onComplete, onError) => {
@@ -115,8 +87,6 @@ const load = async (walletSigner, activeGameAddress, onComplete, onError) => {
 
 const execute = async (directionOrQueuedMove, activeGameAddress, walletSigner, onComplete, onError) => {
   if (board.active().gameOver) return;
-
-  await checkPreapprovals(activeGameAddress, walletSigner);
 
   const direction = directionOrQueuedMove.id ? 
     directionOrQueuedMove.direction : 
@@ -237,7 +207,6 @@ const execute = async (directionOrQueuedMove, activeGameAddress, walletSigner, o
 const reset = () => moves = []
 
 module.exports = {
-  checkPreapprovals,
   constructTransaction,
   load,
   execute,

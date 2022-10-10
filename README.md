@@ -1,6 +1,6 @@
-# Sui 8192
+# Ethos Chess
 
-A fully on-chain, extra challenging version of the popular 2048 game. Built on [Sui](https://sui.io) by [Ethos](https://ethoswallet.xyz).
+A fully on-chain chess game. Built on [Sui](https://sui.io) by [Ethos](https://ethoswallet.xyz).
 
 You can play Sui 8192 at [https://ethoswallet.github.io/Sui8192](https://ethoswallet.github.io/Sui8192)
 

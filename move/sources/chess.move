@@ -29,6 +29,7 @@ module ethos::chess {
     struct ChessPlayerCap has key, store {
         id: UID,
         game_id: ID,
+        player_number: u8,
         name: String,
         description: String,
         url: Url
@@ -92,6 +93,7 @@ module ethos::chess {
         let player1_cap = ChessPlayerCap {
             id: object::new(ctx),
             game_id,
+            player_number: PLAYER1,
             name,
             description,
             url,
@@ -100,6 +102,7 @@ module ethos::chess {
         let player2_cap = ChessPlayerCap {
             id: object::new(ctx),
             game_id,
+            player_number: PLAYER2,
             name,
             description,
             url,
@@ -187,5 +190,9 @@ module ethos::chess {
 
     public fun player_cap_game_id(player_cap: &ChessPlayerCap): &ID {
         &player_cap.game_id
+    }
+
+    public fun player_cap_player_number(player_cap: &ChessPlayerCap): &u8 {
+        &player_cap.player_number
     }
 }

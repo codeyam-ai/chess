@@ -33,6 +33,7 @@ module ethos::chess_tests {
 
             let game_id = object::uid_to_inner(chess::game_id(game));
             assert!(chess::player_cap_game_id(&player1_cap) == &game_id, 1);
+            assert!(chess::player_cap_player_number(&player1_cap) == &PLAYER1, 1);
 
             test_scenario::return_owned(scenario, player1_cap);
             test_scenario::return_shared<ChessGame>(scenario, game_wrapper);
@@ -46,6 +47,7 @@ module ethos::chess_tests {
 
             let game_id = object::uid_to_inner(chess::game_id(game));
             assert!(chess::player_cap_game_id(&player2_cap) == &game_id, 1);
+            assert!(chess::player_cap_player_number(&player2_cap) == &PLAYER2, 1);
             test_scenario::return_owned(scenario, player2_cap);
 
             test_scenario::return_shared<ChessGame>(scenario, game_wrapper);

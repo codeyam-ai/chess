@@ -1,14 +1,13 @@
 {
-  "name": "sui8192",
+  "name": "ethos-chess",
   "version": "0.0.1",
   "main": "index.js",
-  "repository": "https://github.com/EthosWallet/sui-2048-simple.git",
+  "repository": "https://github.com/EthosWallet/chess.git",
   "author": "Jared Cosulich <jared.cosulich@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "@mysten/sui.js": "^0.11.0",
     "browserify": "^17.0.0",
-    "canvas-confetti": "^1.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "static-server": "^2.2.1"

@@ -1,7 +1,8 @@
 const React = require('react');
 const ReactDOM = require('react-dom/client');
 const { EthosWrapper, SignInButton, ethos } = require('ethos-wallet-beta');
-const leaderboard = require('./leaderboard');
+const { JsonRpcProvider } = require("@mysten/sui.js");
+
 const { contractAddress } = require('./constants');
 const { 
   eById, 
@@ -15,7 +16,6 @@ const modal = require('./modal');
 const queue = require('./queue');
 const board = require('./board');
 const moves = require('./moves');
-const confetti = require('./confetti');
 
 const DASHBOARD_LINK = 'https://ethoswallet.xyz/dashboard';
 
@@ -65,8 +65,6 @@ window.onkeydown = (e) => {
 
 function init() {
   // test();
-
-  leaderboard.load();
   
   const ethosConfiguration = {
     appId: 'sui-8192'
@@ -98,23 +96,6 @@ function init() {
 }
 
 function handleResult(newBoard, direction) { 
-  if (newBoard.topTile > topTile) {
-    topTile = newBoard.topTile;
-    const topTiles = eByClass('top-tile-display');
-    for (const topTile of topTiles) {
-      topTile.innerHTML = `<img src='${newBoard.url}' />`;
-    }
-    confetti.run();
-
-    setTimeout(() => {
-      if (topTile >= leaderboard.minTile() && newBoard.score > leaderboard.minScore()) {
-        modal.open('high-score', 'container')
-      } else {
-        modal.open('top-tile', 'container')
-      }
-    }, 1000)
-  }
-  
   const tiles = eByClass('tile');
   const resultDiff = board.diff(board.active().spaces, newBoard.spaces, direction);
  
@@ -185,7 +166,7 @@ async function loadWalletContents() {
 }
 
 async function loadGames() {
-  if (!walletSigner || !leaderboard) {
+  if (!walletSigner) {
     setTimeout(loadGames, 500);
     return;
   }
@@ -195,21 +176,27 @@ async function loadGames() {
   gamesElement.innerHTML = "";
   
   await loadWalletContents();
-
+  
   addClass(eById('loading-games'), 'hidden');
   
-  games = walletContents.nfts.filter(
+  const playerCaps = walletContents.nfts.filter(
     (nft) => nft.package === contractAddress
   ).map(
     (nft) => ({
-      address: nft.address,
-      boards: nft.extraFields.boards,
-      topTile: nft.extraFields.top_tile,
-      score: nft.extraFields.score,
-      imageUri: nft.imageUri
+      gameId: nft.extraFields.game_id
     })
-  ).sort((a, b) => b.score - a.score);
- 
+  );
+
+  const provider = new JsonRpcProvider('https://gateway.devnet.sui.io/');
+  const sharedObjects = await provider.getObjectBatch(playerCaps.map(p => p.gameId));
+  
+  games = sharedObjects.map(
+    (sharedObject) => {
+      const { details: { data: { fields } } } = sharedObject;
+      return fields;
+    }
+  )
+
   if (!games || games.length === 0) {
     const newGameArea = document.createElement('DIV');
     newGameArea.classList.add('text-center');
@@ -222,60 +209,7 @@ async function loadGames() {
     gamesElement.append(newGameArea);
   }
 
-  for (const game of games) {
-    const gameElement = document.createElement('DIV');
-    let topGames = leaderboard.topGames();
-    if (topGames.length === 0) topGames = [];
-    const leaderboardItemIndex = topGames.findIndex(
-      (top_game) => top_game.fields.game_id === game.address
-    );
-    const leaderboardItem = topGames[leaderboardItemIndex];
-    const leaderboardItemUpToDate = leaderboardItem?.fields.score === game.score
-    addClass(gameElement, 'game-preview');
-    setOnClick(
-      gameElement,
-      () => {
-        addClass(eById('leaderboard'), 'hidden');
-        removeClass(eById('game'), 'hidden');
-        setActiveGame(game);
-      }
-    );
-
-    gameElement.innerHTML = `
-      <div class='leader-stats flex-1'> 
-        <div class='leader-tile subsubtitle color${game.topTile + 1}'>
-          ${Math.pow(2, game.topTile + 1)}
-        </div>
-        <div class='leader-score'>
-          Score <span>${game.score}</span>
-        </div>
-      </div>
-      <div class='game-preview-right'> 
-        <div class="${leaderboardItem && leaderboardItemUpToDate ? '' : 'hidden'}">
-          <span class="light">Leaderboard:</span> <span class='bold'>${leaderboardItemIndex + 1}</span>
-        </div>
-        <button class='potential-leaderboard-game ${leaderboardItemUpToDate ? 'hidden' : ''}'>
-          ${leaderboardItem ? 'Update' : 'Add To'} Leaderboard
-        </button>
-      </div>
-    `
-
-    gamesElement.append(gameElement);
-
-    setOnClick(
-      gameElement,
-      (e) => {
-        e.stopPropagation();
-        leaderboard.submit(
-          game.address, 
-          walletSigner, 
-          () => {
-            loadGames();
-          }
-        )
-      }
-    )
-  }
+  
 }
 
 async function setActiveGame(game) {
@@ -283,7 +217,6 @@ async function setActiveGame(game) {
 
   eById('transactions-list').innerHTML = "";
   moves.reset();
-  moves.checkPreapprovals(activeGameAddress, walletSigner);
   
   moves.load(
     walletSigner,
@@ -307,33 +240,8 @@ async function setActiveGame(game) {
   board.display(activeBoard);
 
   modal.close();
-  addClass(eById("leaderboard"), 'hidden');
-  removeClass(eByClass('leaderboard-button'), 'selected')
   removeClass(eById("game"), 'hidden');
   addClass(eByClass('play-button'), 'selected')
-
-  setOnClick(
-    eById('submit-game-to-leaderboard'), 
-    () => {
-      showLeaderboard();
-      leaderboard.submit(
-        activeGameAddress, 
-        walletSigner, 
-        () => {
-          loadGames();
-        }
-      )
-    }
-  );
-}
-
-function showLeaderboard() {
-  leaderboard.load();
-  loadGames();
-  addClass(eById('game'), 'hidden');
-  removeClass(eByClass('play-button'), 'selected');
-  removeClass(eById('leaderboard'), 'hidden');
-  addClass(eByClass('leaderboard-button'), 'selected');
 }
 
 const initializeClicks = () => {
@@ -341,7 +249,6 @@ const initializeClicks = () => {
     addClass(eByClass('error'), 'hidden');
   })
   setOnClick(eById('sign-in'), ethos.showSignInModal);
-  setOnClick(eByClass('leaderboard-button'), showLeaderboard)
   setOnClick(eByClass('title'), ethos.showWallet)
   
   setOnClick(
@@ -365,7 +272,6 @@ const initializeClicks = () => {
 
       addClass(document.body, 'signed-out');
       removeClass(document.body, 'signed-in');
-      addClass(eById('leaderboard'), 'hidden');
       removeClass(eById('game'), 'hidden');
       addClass(eById('loading-games'), 'hidden');
 
@@ -381,7 +287,6 @@ const initializeClicks = () => {
     eByClass('play-button'), 
     () => {
       if (games && games.length > 0) {
-        addClass(eById('leaderboard'), 'hidden');
         removeClass(eById('game'), 'hidden');
         setActiveGame(games[0]);
       } else if (walletSigner) {
@@ -389,21 +294,6 @@ const initializeClicks = () => {
       } else {
         ethos.showSignInModal();
       }
-    }
-  );
-
-  setOnClick(
-    eById('modal-submit-to-leaderboard'),
-    () => {
-      modal.close();
-      showLeaderboard();
-      leaderboard.submit(
-        activeGameAddress, 
-        walletSigner, 
-        () => {
-          loadGames();
-        }
-      )
     }
   );
 
@@ -437,9 +327,9 @@ const onWalletConnected = async ({ signer }) => {
             const details = {
               network: 'sui',
               address: contractAddress,
-              moduleName: 'game_8192',
-              functionName: 'create',
-              inputValues: [],
+              moduleName: 'chess',
+              functionName: 'create_game',
+              inputValues: ["0xede0572dbe60ac1c2210715aefc5818d73995bea"],
               gasBudget: 5000
             };
         
@@ -448,6 +338,8 @@ const onWalletConnected = async ({ signer }) => {
                 signer: walletSigner, 
                 details
               })
+
+              console.log("DATA", data);
 
               if (!data) {
                 modal.open('create-error', 'container');
@@ -492,6 +384,7 @@ const onWalletConnected = async ({ signer }) => {
     );
     
     await loadGames();
+    console.log("GAMES", games);
 
     if (!contentsInterval) {
       contentsInterval = setInterval(loadWalletContents, 3000)
@@ -504,8 +397,6 @@ const onWalletConnected = async ({ signer }) => {
 
       if (games.length === 1) {
         setActiveGame(games[0]);
-      } else {
-        showLeaderboard();
       }
     }
     
