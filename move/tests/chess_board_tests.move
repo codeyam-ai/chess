@@ -159,7 +159,7 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 4)]
+    #[expected_failure(abort_code = 2)]
     fun test_modify_bad_off_board_move_bottom() {
         use ethos::chess_board::{new, modify};
 
@@ -171,7 +171,7 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 4)]
+    #[expected_failure(abort_code = 2)]
     fun test_modify_bad_off_board_move_right() {
         use ethos::chess_board::{new, modify};
 
@@ -180,6 +180,29 @@ module ethos::chess_board_tests {
         modify(&mut board, PLAYER1, 2, 7, 4, 6);
         modify(&mut board, PLAYER1, 4, 6, 6, 7);
         modify(&mut board, PLAYER1, 6, 7, 8, 6);
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 2)]
+    fun test_modify_bad_knight_move() {
+        use ethos::chess_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, PLAYER1, 0, 1, 2, 1);
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 2)]
+    fun test_modify_bad_knight_move_2() {
+        use ethos::chess_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, PLAYER1, 0, 1, 2, 2);
+        modify(&mut board, PLAYER1, 2, 2, 3, 3);
 
         transfer::share_object(TestChessBoard { board });
     }

@@ -28,7 +28,6 @@ module ethos::chess_board {
     const EWRONG_PLAYER: u64 = 1;
     const EBAD_DESTINATION: u64 = 2;
     const EOCCUPIED_SPACE: u64 = 3;
-    const EOFF_BOARD: u64 = 4;
     
     struct ChessBoard has store, copy {
         spaces: vector<vector<Option<ChessPiece>>>,
@@ -99,7 +98,7 @@ module ethos::chess_board {
     }
 
     public(friend) fun modify(board: &mut ChessBoard, player_number: u8, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
-        assert!(to_row < ROW_COUNT && to_col < COLUMN_COUNT, EOFF_BOARD);
+        assert!(to_row < ROW_COUNT && to_col < COLUMN_COUNT, EBAD_DESTINATION);
         
         let old_space = space_at_mut(board, from_row, from_col);
         assert!(option::is_some(old_space), EEMPTY_SPACE);
@@ -107,6 +106,7 @@ module ethos::chess_board {
         let piece = option::extract(old_space);
         assert!(piece.player_number == player_number, EWRONG_PLAYER);
 
+        assert!(is_valid_move(piece, from_row, from_col, to_row, to_col), EBAD_DESTINATION);
         let new_space = space_at_mut(board, to_row, to_col);
 
         if (option::is_some(new_space)) {
@@ -202,13 +202,22 @@ module ethos::chess_board {
         }
     }
 
-
-    // fun analyze_move(board: &ChessBoard, piece: &u8, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
-    //     assert!(to_row < ROW_COUNT, EBAD_DESTINATION);
-    //     assert!(to_col < COLUMN_COUNT, EBAD_DESTINATION);
+    fun is_valid_move(piece: ChessPiece, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
+        if (piece.type == KNIGHT) {
+            if (
+                (from_row + 2 == to_row && (from_col + 1 == to_col || from_col == to_col + 1)) ||
+                (from_row == to_row + 2 && (from_col + 1 == to_col || from_col == to_col + 1)) ||
+                (from_row + 1 == to_row && (from_col + 2 == to_col || from_col == to_col + 2)) ||
+                (from_row == to_row + 1 && (from_col + 2 == to_col || from_col == to_col + 2))
+            ) {
+                return true
+            }
+        } else {
+            return true
+        };
         
-    //     true
-    // }
+        false
+    }
 
 }
 
