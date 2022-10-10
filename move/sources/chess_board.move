@@ -229,6 +229,13 @@ module ethos::chess_board {
             ) {
                 return true
             }
+        } else if (piece.type == KING) {
+            if (
+                (from_row + 1 == to_row || from_row == to_row + 1 || from_row == to_row) &&
+                (from_col + 1 == to_col || from_row == to_col + 1 || from_col == to_col)
+            ) {
+                return true
+            }
         } else {
             return true
         };

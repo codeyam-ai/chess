@@ -244,5 +244,19 @@ module ethos::chess_board_tests {
         transfer::share_object(TestChessBoard { board });
     }
 
+    #[test]
+    #[expected_failure(abort_code = 2)]
+    fun test_modify_bad_king_move() {
+        use ethos::chess_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 3, 2, 3);
+        modify(&mut board, PLAYER1, 2, 3, 3, 3);
+        modify(&mut board, PLAYER1, 3, 3, 4, 3);
+        modify(&mut board, PLAYER1, 0, 3, 1, 3);
+        modify(&mut board, PLAYER1, 1, 3, 3, 3);
+
+        transfer::share_object(TestChessBoard { board });
+    }
 
 }
