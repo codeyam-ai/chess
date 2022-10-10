@@ -203,7 +203,17 @@ module ethos::chess_board {
     }
 
     fun is_valid_move(piece: ChessPiece, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
-        if (piece.type == KNIGHT) {
+        if (piece.type == PAWN) {
+            if (piece.player_number == PLAYER1) {
+                if (from_row + 1 == to_row && from_col == to_col) {
+                    return true
+                }
+            } else {
+                if (from_row == to_row + 1 && from_col == to_col) {
+                    return true
+                }
+            }
+        } else if (piece.type == KNIGHT) {
             if (
                 (from_row + 2 == to_row && (from_col + 1 == to_col || from_col == to_col + 1)) ||
                 (from_row == to_row + 2 && (from_col + 1 == to_col || from_col == to_col + 1)) ||

@@ -186,6 +186,29 @@ module ethos::chess_board_tests {
 
     #[test]
     #[expected_failure(abort_code = 2)]
+    fun test_modify_bad_pawn_move() {
+        use ethos::chess_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 1, 2, 2);
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 2)]
+    fun test_modify_bad_pawd_move_2() {
+        use ethos::chess_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 1, 2, 1);
+        modify(&mut board, PLAYER1, 2, 1, 1, 1);
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 2)]
     fun test_modify_bad_knight_move() {
         use ethos::chess_board::{new, modify};
 
