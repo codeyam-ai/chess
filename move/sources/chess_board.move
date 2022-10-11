@@ -234,6 +234,8 @@ module ethos::chess_board {
             ) {
                 return true
             }
+        } else if (piece.type == BISHOP) {
+            return true
         } else if (piece.type == KING) {
             if (
                 (from_row + 1 == to_row || from_row == to_row + 1 || from_row == to_row) &&

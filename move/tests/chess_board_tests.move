@@ -259,6 +259,18 @@ module ethos::chess_board_tests {
 
     #[test]
     #[expected_failure(abort_code = 2)]
+    fun test_modify_bad_bishop_move() {
+        use ethos::chess_board::{new, modify};
+
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 2, 2, 2);
+        modify(&mut board, PLAYER1, 0, 2, 1, 2);
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 2)]
     fun test_modify_bad_king_move() {
         use ethos::chess_board::{new, modify};
 
@@ -304,5 +316,4 @@ module ethos::chess_board_tests {
 
         transfer::share_object(TestChessBoard { board });
     }
-
 }
