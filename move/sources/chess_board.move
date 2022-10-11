@@ -133,6 +133,10 @@ module ethos::chess_board {
         COLUMN_COUNT
     }
 
+    public(friend) fun spaces(board: &ChessBoard): &vector<vector<Option<ChessPiece>>> {
+        &board.spaces
+    }
+
     fun spaces_at(spaces: &vector<vector<Option<ChessPiece>>>, row_index: u64, column_index: u64): &Option<ChessPiece> {
         let row = vector::borrow(spaces, row_index);
         vector::borrow(row, column_index)

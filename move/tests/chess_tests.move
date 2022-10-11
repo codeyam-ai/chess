@@ -39,7 +39,7 @@ module ethos::chess_tests {
             test_scenario::return_shared<ChessGame>(scenario, game_wrapper);
         };  
 
-        test_scenario::next_tx(scenario, &PLAYER1);
+        test_scenario::next_tx(scenario, &PLAYER2);
         {
             let game_wrapper = test_scenario::take_shared<ChessGame>(scenario);
             let game = test_scenario::borrow_mut(&mut game_wrapper);
@@ -47,7 +47,7 @@ module ethos::chess_tests {
 
             let game_id = object::uid_to_inner(chess::game_id(game));
             assert!(chess::player_cap_game_id(&player2_cap) == &game_id, 1);
-            assert!(chess::player_cap_player_number(&player2_cap) == &2, 1);
+            assert!(chess::player_cap_player_number(&player2_cap) == &2, (*chess::player_cap_player_number(&player2_cap) as u64));
             test_scenario::return_owned(scenario, player2_cap);
 
             test_scenario::return_shared<ChessGame>(scenario, game_wrapper);

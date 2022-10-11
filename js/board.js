@@ -17,6 +17,9 @@ module.exports = {
         const column = row[j];
         const spaceElement = spaceElements[(i * spaces.length) + j];
 
+        spaceElement.dataset.row = i;
+        spaceElement.dataset.column = j;
+
         if (column.player_number) {
           spaceElement.innerHTML = pieces[`${column.player_number}${column.type}`]
           spaceElement.dataset.player = column.player_number;

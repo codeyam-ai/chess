@@ -36,11 +36,12 @@ module ethos::chess {
     }
 
     struct ChessMove has store {
-        from_row: u8,
-        from_column: u8,
-        to_row: u8,
-        to_column: u8,
+        from_row: u64,
+        from_column: u64,
+        to_row: u64,
+        to_column: u64,
         player: address,
+        player_number: u8,
         epoch: u64
     }
 
@@ -52,12 +53,13 @@ module ethos::chess {
 
     struct ChessMoveEvent has copy, drop {
         game_id: ID,
-        from_row: u8,
-        from_column: u8,
-        to_row: u8,
-        to_column: u8,
+        from_row: u64,
+        from_column: u64,
+        to_row: u64,
+        to_column: u64,
         player: address,
-        board_spaces: vector<vector<Option<u8>>>,
+        player_number: u8,
+        board_spaces: vector<vector<Option<ChessPiece>>>,
         epoch: u64
     }
 
@@ -129,14 +131,43 @@ module ethos::chess {
         };
 
         let board = current_board_mut(game);
+        let new_board = *board;
         
-        chess_board::modify(board, player_number, from_row, from_column, to_row, to_column);
+        chess_board::modify(&mut new_board, player_number, from_row, from_column, to_row, to_column);
         
         if (player == game.player1) {
             game.current_player = *&game.player2;
         } else {
             game.current_player = *&game.player1;
-        }
+        };
+
+        let board_spaces = *chess_board::spaces(&new_board);
+        let epoch = tx_context::epoch(ctx);
+
+        event::emit(ChessMoveEvent {
+            game_id: object::uid_to_inner(&game.id),
+            from_row,
+            from_column,
+            to_row,
+            to_column,
+            player,
+            player_number,
+            board_spaces,
+            epoch
+        });
+
+        let new_move = ChessMove {
+          from_row,
+          from_column,
+          to_row,
+          to_column,
+          player,
+          player_number,
+          epoch
+        };
+
+        vector::push_back(&mut game.moves, new_move);
+        vector::push_back(&mut game.boards, new_board);
     }
 
     public fun game_id(game: &ChessGame): &UID {

@@ -18834,6 +18834,9 @@ module.exports = {
         const column = row[j];
         const spaceElement = spaceElements[(i * spaces.length) + j];
 
+        spaceElement.dataset.row = i;
+        spaceElement.dataset.column = j;
+
         if (column.player_number) {
           spaceElement.innerHTML = pieces[`${column.player_number}${column.type}`]
           spaceElement.dataset.player = column.player_number;
@@ -19196,10 +19199,12 @@ const moves = require('./moves');
 const DASHBOARD_LINK = 'https://ethoswallet.xyz/dashboard';
 
 let walletSigner;
+let playerNumber;
 let games;
 let activeGameAddress;
 let walletContents = {};
 let contentsInterval;
+let selectedPiece;
 
 function init() {
   // test();
@@ -19295,7 +19300,10 @@ async function loadGames() {
   games = sharedObjects.map(
     (sharedObject) => {
       const { details: { data: { fields } } } = sharedObject;
-      return fields;
+      return {
+        ...fields,
+        address: fields.id.id
+      };
     }
   )
 
@@ -19330,14 +19338,20 @@ async function setActiveGame(game) {
   addClass(eByClass('play-button'), 'selected')
 }
 
-function setPieceToMove(e) {
+async function setPieceToMove(e) {
   let node = e.target;
   while (!node.dataset.player) {
     if (!node.parentNode) break;
     node = node.parentNode;
   }
 
-  addClass(node, 'selected')
+  if (selectedPiece) {
+    addClass(node, 'destination');
+    moves.execute(walletSigner, selectedPiece.dataset, node.dataset, activeGameAddress)
+  } else {
+    addClass(node, 'selected');
+    selectedPiece = node;
+  }
 }
 
 const initializeClicks = () => {
@@ -19434,8 +19448,6 @@ const onWalletConnected = async ({ signer }) => {
                 signer: walletSigner, 
                 details
               })
-
-              console.log("DATA", data);
 
               if (!data) {
                 modal.open('create-error', 'container');
@@ -27938,119 +27950,32 @@ const queue = require('./queue');
 
 let moves = {};
 
-const constructTransaction = (direction, activeGameAddress) => {
+const constructTransaction = (selected, destination, activeGameAddress) => {
   return {
     network: 'sui',
     address: contractAddress,
-    moduleName: 'game_8192',
+    moduleName: 'chess',
     functionName: 'make_move',
     inputValues: [
       activeGameAddress,
-      direction
+      selected.row,
+      selected.column,
+      destination.row,
+      destination.column
     ],
     gasBudget: 20000
   }
 }
 
-const load = async (walletSigner, activeGameAddress, onComplete, onError) => {
-  if (walletSigner.extension) {
-    return;
-  } 
-
-  const directions = ["0", "1", "2", "3"];
-
-  if (Object.keys(moves).length === directions.length) {
-    return;
-  }
-
-  const transactions = []
-  for (const direction of directions) {
-    const transaction = constructTransaction(direction, activeGameAddress);
-    transaction.id = direction;
-    transactions.push(transaction);
-  }
-
-  ethos.transact({
-    id: "load-moves",
-    signer: walletSigner,
-    details: {
-      network: 'sui',
-      signOnly: true,
-      transactions: transactions
-    }, 
-    onPopulated({ data }) {
-      if (data.error) {
-        onError(data.error);
-        return;
-      }
-      
-      for (const { id: direction, transaction } of data.transactions) {
-        moves[direction] = {
-          ...(moves[direction] || {}),
-          populatedTransaction: transaction
-        }
-      }
-    },
-    onSigned({ data }) {
-      if (data.error) {
-        onError();
-        return;
-      }
-      for (const { id: direction, transaction } of data.transactions) {
-        moves[direction] = {
-          ...(moves[direction] || {}),
-          signedTransaction: transaction
-        }
-      }
-    },
-    onCompleted() {
-      const queuedMove = queue.next()
-      if (queuedMove) execute(queuedMove, activeGameAddress, walletSigner, onComplete, onError);
-    }
-  });
-  ethos.hideWallet();
-}
-
-const execute = async (directionOrQueuedMove, activeGameAddress, walletSigner, onComplete, onError) => {
-  if (board.active().gameOver) return;
-
-  const direction = directionOrQueuedMove.id ? 
-    directionOrQueuedMove.direction : 
-    directionOrQueuedMove;
-
-  const directionNumber = directionToDirectionNumber(direction);
-  const move = moves[directionNumber];
-  
-  let details;
-
-  if (!walletSigner.extension) {
-    if (!move?.populatedTransaction || !move?.signedTransaction) {
-      if (!directionOrQueuedMove.id) {
-        queue.add(direction);
-      }
-      return;
-    }  
-
-    details = {
-      network: 'sui',
-      signedInfo: move
-    } 
-  } else {
-    details = constructTransaction(directionNumber, activeGameAddress)
-  }
-
-  moves = {};
+const execute = async (walletSigner, selected, destination, activeGameAddress) => {
+  const details = constructTransaction(selected, destination, activeGameAddress);
 
   ethos.transact({
     id: 'move',
     signer: walletSigner, 
     details,
     onCompleted: async ({ data }) => {
-      if (directionOrQueuedMove.id) {
-        queue.remove(directionOrQueuedMove);
-      }
-      
-      load(walletSigner, activeGameAddress, onComplete, onError);
+      console.log("DATA", data);
       
       if (data?.effects?.status?.error === "InsufficientGas") {
         onError()
@@ -28066,6 +27991,7 @@ const execute = async (directionOrQueuedMove, activeGameAddress, walletSigner, o
       const { effects } = data;
       const { gasUsed, events} = effects;
       const { computationCost, storageCost, storageRebate } = gasUsed;
+      console.log("EVENTS", event)
       const event = events[0].moveEvent;
       
       onComplete(board.convertInfo(event), direction);
@@ -28083,6 +28009,7 @@ const execute = async (directionOrQueuedMove, activeGameAddress, walletSigner, o
         },
         moveCount: fields.move_count
       };
+      
       const transactionElement = document.createElement("DIV");
       addClass(transactionElement, 'transaction');
       transactionElement.innerHTML = `
@@ -28134,7 +28061,6 @@ const reset = () => moves = []
 
 module.exports = {
   constructTransaction,
-  load,
   execute,
   reset
 };

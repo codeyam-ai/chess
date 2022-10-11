@@ -20,10 +20,12 @@ const moves = require('./moves');
 const DASHBOARD_LINK = 'https://ethoswallet.xyz/dashboard';
 
 let walletSigner;
+let playerNumber;
 let games;
 let activeGameAddress;
 let walletContents = {};
 let contentsInterval;
+let selectedPiece;
 
 function init() {
   // test();
@@ -119,7 +121,10 @@ async function loadGames() {
   games = sharedObjects.map(
     (sharedObject) => {
       const { details: { data: { fields } } } = sharedObject;
-      return fields;
+      return {
+        ...fields,
+        address: fields.id.id
+      };
     }
   )
 
@@ -154,14 +159,20 @@ async function setActiveGame(game) {
   addClass(eByClass('play-button'), 'selected')
 }
 
-function setPieceToMove(e) {
+async function setPieceToMove(e) {
   let node = e.target;
   while (!node.dataset.player) {
     if (!node.parentNode) break;
     node = node.parentNode;
   }
 
-  addClass(node, 'selected')
+  if (selectedPiece) {
+    addClass(node, 'destination');
+    moves.execute(walletSigner, selectedPiece.dataset, node.dataset, activeGameAddress)
+  } else {
+    addClass(node, 'selected');
+    selectedPiece = node;
+  }
 }
 
 const initializeClicks = () => {
@@ -258,8 +269,6 @@ const onWalletConnected = async ({ signer }) => {
                 signer: walletSigner, 
                 details
               })
-
-              console.log("DATA", data);
 
               if (!data) {
                 modal.open('create-error', 'container');
