@@ -18836,6 +18836,11 @@ module.exports = {
 
         if (column.player_number) {
           spaceElement.innerHTML = pieces[`${column.player_number}${column.type}`]
+          spaceElement.dataset.player = column.player_number;
+          spaceElement.dataset.type = column.type;
+        } else {
+          spaceElement.dataset.player = null;
+          spaceElement.dataset.type = null;
         }
         
       }
@@ -19194,51 +19199,13 @@ let walletSigner;
 let games;
 let activeGameAddress;
 let walletContents = {};
-let topTile = 2;
 let contentsInterval;
-
-window.onkeydown = (e) => {
-  let direction;
-  switch (e.keyCode) {
-    case 37: 
-      direction = "left";
-      break;
-    case 38: 
-      direction = "up";
-      break;
-    case 39: 
-      direction = "right";
-      break;
-    case 40: 
-      direction = "down";
-      break;
-  }
-  if (!direction) return;
-
-  e.preventDefault();
-  moves.execute(
-    direction, 
-    activeGameAddress, 
-    walletSigner,
-    (newBoard, direction) => {
-      handleResult(newBoard, direction);
-      loadWalletContents();
-    },
-    (error) => {
-      if (error) {
-        showUnknownError(error)
-      } else {
-        showGasError();
-      }
-    }
-  );
-}
 
 function init() {
   // test();
   
   const ethosConfiguration = {
-    appId: 'sui-8192'
+    appId: 'ethos-chess'
   };
 
   const start = eById('ethos-start');
@@ -19266,45 +19233,8 @@ function init() {
   initializeClicks();
 }
 
-function handleResult(newBoard, direction) { 
-  const tiles = eByClass('tile');
-  const resultDiff = board.diff(board.active().spaces, newBoard.spaces, direction);
- 
-  const scoreDiff = parseInt(newBoard.score) - parseInt(board.active().score)
-  if (scoreDiff > 0) {
-    const scoreDiffElement = eById('score-diff');
-    scoreDiffElement.innerHTML = `+${scoreDiff}`;
-    addClass(scoreDiffElement, 'floating');
-    setTimeout(() => {
-      removeClass(scoreDiffElement, 'floating');
-    }, 2000);
-  }
-
-  for (const key of Object.keys(resultDiff)) {
-    const resultItem = resultDiff[key];
-    const tile = tiles[parseInt(key)];
-    
-    if (resultItem[direction]) {
-      const className = `${direction}${resultItem[direction]}`;
-      addClass(tile, className);
-      setTimeout(() => {
-        removeClass(tile, className);
-      }, 500);
-    }
-
-    if (resultItem.merge) {
-      setTimeout(() => {
-        addClass(tile, "merge");
-        setTimeout(() => {
-          removeClass(tile, "merge");
-        }, 500)
-      }, 80);
-    }
-  }
-
-  setTimeout(() => {
-    board.display(newBoard)
-  }, 150)
+function handleResult(newBoard) { 
+  board.display(newBoard)
 }
 
 function showGasError() {
@@ -19319,7 +19249,6 @@ function showUnknownError(error) {
 }
 
 async function loadWalletContents() {
-  console.log("HI1")
   if (!walletSigner) return;
   const address = await walletSigner.getAddress();
   eById('wallet-address').innerHTML = truncateMiddle(address, 4);
@@ -19391,30 +19320,24 @@ async function setActiveGame(game) {
   eById('transactions-list').innerHTML = "";
   moves.reset();
   
-  moves.load(
-    walletSigner,
-    activeGameAddress,
-    (newBoard, direction) => {
-      handleResult(newBoard, direction);
-      loadWalletContents();
-    },
-    (error) => {
-      if (error) {
-        showUnknownError(error)
-      } else {
-        showGasError();
-      }
-    }
-  );
-
   const boards = game.boards;
   const activeBoard = board.convertInfo(boards[boards.length - 1]);
-  topTile = activeBoard.topTile || 2;
   board.display(activeBoard);
+  setOnClick(eByClass('tile-wrapper'), setPieceToMove)
 
   modal.close();
   removeClass(eById("game"), 'hidden');
   addClass(eByClass('play-button'), 'selected')
+}
+
+function setPieceToMove(e) {
+  let node = e.target;
+  while (!node.dataset.player) {
+    if (!node.parentNode) break;
+    node = node.parentNode;
+  }
+
+  addClass(node, 'selected')
 }
 
 const initializeClicks = () => {
@@ -19603,108 +19526,6 @@ window.requestAnimationFrame(init);
 
 
 
-
-
-
-
-
-
-/// FOR TESTING ///
-
-// function print(board) {
-//   const rows = board.length;
-  
-//   const printRows = []
-//   for (let i=0; i<rows; ++i) {
-//     printRows.push(board[i].join(','));
-//   }
-//   console.log(printRows.join('\n'));
-// }
-
-// function test() {
-//   const boardStart = [
-//     [0,  0,  99, 99],
-//     [99, 99, 1,  99],
-//     [0,  0,  1,  99],
-//     [1,  99, 1,  99]
-//   ]
-  
-//   const boardLeft = [
-//     [1,  99, 99, 99],
-//     [1,  99, 99, 99],
-//     [1,  1,  99, 99],
-//     [2,  99, 99, 99]
-//   ]
-  
-//   const boardRight = [
-//     [99, 99, 99, 1],
-//     [99, 99, 99, 1],
-//     [99, 99, 1,  1],
-//     [99, 99, 99, 2]
-//   ]
-  
-//   const boardUp = [
-//     [1,  1,  2,  99],
-//     [1,  99, 1,  99],
-//     [99, 99, 99, 99],
-//     [99, 99, 99, 99]
-//   ]
-  
-//   const boardDown = [
-//     [99, 99, 99, 99],
-//     [99, 99, 99, 99],
-//     [1,  99, 1,  99],
-//     [1,  1,  2,  99]
-//   ]
-
-//   const tests = [{
-//     direction: "left",
-//     board1: boardStart,
-//     board2: boardLeft,
-//     result: {"0":{"merge":true},"1":{"left":1},"6":{"left":2},"8":{"merge":true},"9":{"left":1},"10":{"left":1},"12":{"merge":true},"14":{"left":2}}
-//   }, {
-//     direction: "right",
-//     board1: boardStart,
-//     board2: boardRight,
-//     result: {"0":{"right":3},"1":{"right":2},"3":{"merge":true},"6":{"right":1},"8":{"right":2},"9":{"right":1},"10":{"merge":true},"12":{"right":3},"14":{"right":1},"15":{"merge":true}}
-//   },{        
-//     direction: "up",
-//     board1: boardStart,
-//     board2: boardUp,
-//     result: {"0":{"merge":true},"1":{"merge":true},"2":{"merge":true},"6":{"up":1},"8":{"up":2},"9":{"up":2},"10":{"up":2},"12":{"up":2},"14":{"up":2}}
-//   }, {
-//     direction: "down",
-//     board1: boardStart,
-//     board2: boardDown,
-//     result: {"0":{"down":2},"1":{"down":3},"6":{"down":1},"8":{"merge":true},"9":{"down":1},"10":{"down":1},"13":{"merge":true},"14":{"merge":true}}   
-//   }, {
-//     direction: "down",
-//     board1: [
-//       [1, 1, 99,99],
-//       [99,99,99,99],
-//       [1, 99,99,99],
-//       [99,99,99,99]
-//     ],
-//     board2: [
-//       [99,99,99,99],
-//       [99,99,99,99],
-//       [1, 99,99,99],
-//       [2, 1, 99,99]
-//     ],
-//     result: {"0":{"down":3},"1":{"down":3},"8":{"down":1},"12":{"merge":true}}
-//   }]
-
-//   for (const t of tests) {
-//     const { direction, board1: rawBoard1, board2, result } = t;
-//     const board1 = rawBoard1.map(c => [...c])
-//     const actualResult = board.diff(board1, board2, direction)
-//     for (const key of Object.keys(result)) {
-//       if (actualResult[key].merge !== result[key].merge || actualResult[key][direction] !== result[key][direction]) {
-//         console.log("TEST FAILED!", key)
-//       }
-//     }
-//   }
-// }
 
 const xWalletContents = {
   "balance": 5299899830,

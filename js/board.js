@@ -19,6 +19,11 @@ module.exports = {
 
         if (column.player_number) {
           spaceElement.innerHTML = pieces[`${column.player_number}${column.type}`]
+          spaceElement.dataset.player = column.player_number;
+          spaceElement.dataset.type = column.type;
+        } else {
+          spaceElement.dataset.player = null;
+          spaceElement.dataset.type = null;
         }
         
       }
