@@ -337,33 +337,6 @@ a:visited {
   box-shadow: 3px 3px 24px 3px #dfdfe0;
 }
 
-#queue {
-  position: absolute;
-  top: 6px;
-  margin-left: auto;
-  margin-right: auto;
-  left: 0;
-  right: 0;
-  text-align: center;
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  z-index: 10;
-}
-
-#queue .queue-element {
-  background-color: black;
-  color: white;
-  border: 1px solid #ccc;
-  width: 30px;
-  height: 30px;
-  border-radius: 15px;
-  font-size: large;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .row {
   display: flex;
   flex-direction: row;
@@ -391,7 +364,11 @@ a:visited {
 }
 
 .tile-wrapper.selected {
-  background-color: #333;
+  background-color: #ccc;
+}
+
+.tile-wrapper.destination {
+  background-color: #ccc;
 }
 
 .signed-out .row-1 .tile {
