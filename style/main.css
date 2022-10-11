@@ -374,14 +374,14 @@ a:visited {
 .tile-wrapper {
   background-color: #fbfaf9;
   border-radius: 12px;
-  width: 100px;
-  height: 100px;
+  width: 60px;
+  height: 60px;
 }
 
 .tile,
 .tile-result {
-  width: 100px;
-  height: 100px;
+  width: 60px;
+  height: 60px;
   background-color: #fbfaf9;
   border-radius: 12px;
   display: flex;
