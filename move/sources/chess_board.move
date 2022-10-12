@@ -235,7 +235,9 @@ module ethos::chess_board {
                 return true
             }
         } else if (piece.type == BISHOP) {
-            return true
+            let row_diff = abs_subtract(from_row, to_row);
+            let col_diff = abs_subtract(from_col, to_col);
+            return row_diff == col_diff
         } else if (piece.type == KING) {
             if (
                 (from_row + 1 == to_row || from_row == to_row + 1 || from_row == to_row) &&

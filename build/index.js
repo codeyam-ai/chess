@@ -18862,6 +18862,7 @@ module.exports = {
   },
 
   convertInfo: (board) => {
+    console.log("BOARD", board)
     const { 
       spaces: rawSpaces, 
       board_spaces: rawBoardSpaces, 

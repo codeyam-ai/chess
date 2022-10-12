@@ -282,8 +282,6 @@ const onWalletConnected = async ({ signer }) => {
                 details
               })
 
-              console.log("MINT DATA", data);
-
               if (!data) {
                 modal.open('create-error', 'container');
                 return;
@@ -292,12 +290,11 @@ const onWalletConnected = async ({ signer }) => {
               const gameData = data.effects.events.find(
                 e => e.moveEvent
               ).moveEvent.fields;
-              const { board_spaces, score } = gameData;
+              const { board_spaces } = gameData;
               const game = {
                 address: data.effects.created[0].reference.objectId,
                 boards: [
                   {
-                    score,
                     board_spaces,
                     game_over: false
                   }

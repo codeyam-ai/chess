@@ -48,7 +48,8 @@ module ethos::chess {
     struct NewChessGameEvent has copy, drop {
         game_id: ID,
         player1: address,
-        player2: address
+        player2: address,
+        board_spaces: vector<vector<Option<ChessPiece>>>
     }
 
     struct ChessMoveEvent has copy, drop {
@@ -75,6 +76,7 @@ module ethos::chess {
         
         let name = string::utf8(b"Ethos Chess");
         let description = string::utf8(b"Chess - built on Sui  - by Ethos");
+        let board_spaces = *chess_board::spaces(&new_board);
         let url = url::new_unsafe_from_bytes(b"https://ChessBoard.png");
         
         let game = ChessGame {
@@ -113,7 +115,8 @@ module ethos::chess {
         event::emit(NewChessGameEvent {
             game_id,
             player1,
-            player2
+            player2,
+            board_spaces
         });
         
         transfer::share_object(game);
