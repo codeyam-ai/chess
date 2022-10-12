@@ -1,7 +1,7 @@
 
 #[test_only]
 module ethos::chess_board_tests {
-    use ethos::chess_board::{ChessBoard};
+    use ethos::chess_board::{ChessBoard, new, modify, empty_space_count, piece_at_access};
     use sui::transfer;
 
     const EMPTY: u8 = 0;
@@ -22,7 +22,7 @@ module ethos::chess_board_tests {
 
     #[test]
     fun test_new() {
-        use ethos::chess_board::{new, row_count, column_count, empty_space_count, piece_at_access};
+        use ethos::chess_board::{row_count, column_count};
 
         let board = new();
         assert!(row_count() == 8, row_count());
@@ -84,8 +84,6 @@ module ethos::chess_board_tests {
 
     #[test]
     fun test_modify() {
-        use ethos::chess_board::{new, modify, piece_at_access};
-
         let board = new();
         modify(&mut board, PLAYER1, 1, 1, 2, 1);
 
@@ -103,8 +101,6 @@ module ethos::chess_board_tests {
     #[test]
     #[expected_failure(abort_code = 0)]
     fun test_modify_bad_from_empty() {
-        use ethos::chess_board::{new, modify};
-
         let board = new();
         modify(&mut board, PLAYER1, 2, 1, 3, 1);
 
@@ -114,8 +110,6 @@ module ethos::chess_board_tests {
     #[test]
     #[expected_failure(abort_code = 3)]
     fun test_modify_bad_space_occupied() {
-        use ethos::chess_board::{new, modify};
-
         let board = new();
         modify(&mut board, PLAYER1, 0, 0, 0, 1);
 
@@ -125,8 +119,6 @@ module ethos::chess_board_tests {
     #[test]
     #[expected_failure(abort_code = 1)]
     fun test_modify_bad_from_wrong_player_player1() {
-        use ethos::chess_board::{new, modify};
-
         let board = new();
         modify(&mut board, PLAYER2, 1, 1, 2, 1);
 
@@ -136,8 +128,6 @@ module ethos::chess_board_tests {
     #[test]
     #[expected_failure(abort_code = 1)]
     fun test_modify_bad_from_wrong_player_player2() {
-        use ethos::chess_board::{new, modify};
-
         let board = new();
         modify(&mut board, PLAYER1, 6, 1, 5, 1);
 
@@ -146,8 +136,6 @@ module ethos::chess_board_tests {
 
     #[test]
     fun test_modify_capture_piece() {
-        use ethos::chess_board::{new, modify, empty_space_count};
-
         let board = new();
         modify(&mut board, PLAYER1, 0, 1, 2, 2);
         modify(&mut board, PLAYER1, 2, 2, 4, 3);
@@ -162,8 +150,6 @@ module ethos::chess_board_tests {
     #[test]
     #[expected_failure(abort_code = 2)]
     fun test_modify_bad_off_board_move_bottom() {
-        use ethos::chess_board::{new, modify};
-
         let board = new();
         modify(&mut board, PLAYER1, 0, 6, 2, 7);
         modify(&mut board, PLAYER1, 2, 7, 4, 8);
@@ -174,8 +160,6 @@ module ethos::chess_board_tests {
     #[test]
     #[expected_failure(abort_code = 2)]
     fun test_modify_bad_off_board_move_right() {
-        use ethos::chess_board::{new, modify};
-
         let board = new();
         modify(&mut board, PLAYER1, 0, 6, 2, 7);
         modify(&mut board, PLAYER1, 2, 7, 4, 6);
@@ -188,8 +172,6 @@ module ethos::chess_board_tests {
     #[test]
     #[expected_failure(abort_code = 2)]
     fun test_modify_bad_pawn_move() {
-        use ethos::chess_board::{new, modify};
-
         let board = new();
         modify(&mut board, PLAYER1, 1, 1, 2, 2);
 
@@ -199,8 +181,6 @@ module ethos::chess_board_tests {
     #[test]
     #[expected_failure(abort_code = 2)]
     fun test_modify_bad_pawn_move_2() {
-        use ethos::chess_board::{new, modify};
-
         let board = new();
         modify(&mut board, PLAYER1, 1, 1, 2, 1);
         modify(&mut board, PLAYER1, 2, 1, 1, 1);
@@ -211,8 +191,6 @@ module ethos::chess_board_tests {
     #[test]
     #[expected_failure(abort_code = 2)]
     fun test_modify_bad_pawn_move_3() {
-        use ethos::chess_board::{new, modify};
-
         let board = new();
         modify(&mut board, PLAYER2, 6, 1, 5, 1);
         modify(&mut board, PLAYER2, 5, 1, 6, 1);
@@ -221,10 +199,54 @@ module ethos::chess_board_tests {
     }
 
     #[test]
+    fun test_modify_pawn_capture() {
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 1, 2, 1);
+        modify(&mut board, PLAYER1, 2, 1, 3, 1);
+        modify(&mut board, PLAYER1, 3, 1, 4, 1);
+        modify(&mut board, PLAYER1, 4, 1, 5, 1);
+        
+        assert!(empty_space_count(&board) == 32, empty_space_count(&board));
+        modify(&mut board, PLAYER1, 5, 1, 6, 2);
+        assert!(empty_space_count(&board) == 33, empty_space_count(&board));
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    fun test_modify_pawn_capture_player2() {
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 1, 2, 1);
+        modify(&mut board, PLAYER1, 2, 1, 3, 1);
+        modify(&mut board, PLAYER1, 3, 1, 4, 1);
+        modify(&mut board, PLAYER1, 4, 1, 5, 1);
+        
+        assert!(empty_space_count(&board) == 32, empty_space_count(&board));
+        modify(&mut board, PLAYER2, 6, 2, 5, 1);
+        assert!(empty_space_count(&board) == 33, empty_space_count(&board));
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 2)]
+    fun test_modify_bad_pawn_capture() {
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 1, 2, 1);
+        modify(&mut board, PLAYER1, 2, 1, 3, 1);
+        modify(&mut board, PLAYER1, 3, 1, 4, 1);
+        modify(&mut board, PLAYER1, 4, 1, 5, 1);
+        modify(&mut board, PLAYER2, 6, 2, 5, 2);
+        modify(&mut board, PLAYER2, 5, 2, 4, 2);
+        modify(&mut board, PLAYER1, 5, 1, 4, 2);
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+
+    #[test]
     #[expected_failure(abort_code = 2)]
     fun test_modify_bad_rook_move() {
-        use ethos::chess_board::{new, modify};
-
         let board = new();
         modify(&mut board, PLAYER1, 1, 0, 2, 0);
         modify(&mut board, PLAYER1, 2, 0, 3, 0);
@@ -237,8 +259,6 @@ module ethos::chess_board_tests {
     #[test]
     #[expected_failure(abort_code = 2)]
     fun test_modify_bad_knight_move() {
-        use ethos::chess_board::{new, modify};
-
         let board = new();
         modify(&mut board, PLAYER1, 0, 1, 2, 1);
 
@@ -248,8 +268,6 @@ module ethos::chess_board_tests {
     #[test]
     #[expected_failure(abort_code = 2)]
     fun test_modify_bad_knight_move_2() {
-        use ethos::chess_board::{new, modify};
-
         let board = new();
         modify(&mut board, PLAYER1, 0, 1, 2, 2);
         modify(&mut board, PLAYER1, 2, 2, 3, 3);
@@ -260,8 +278,6 @@ module ethos::chess_board_tests {
     #[test]
     #[expected_failure(abort_code = 2)]
     fun test_modify_bad_bishop_move() {
-        use ethos::chess_board::{new, modify};
-
         let board = new();
         modify(&mut board, PLAYER1, 1, 2, 2, 2);
         modify(&mut board, PLAYER1, 0, 2, 1, 2);
@@ -272,8 +288,6 @@ module ethos::chess_board_tests {
     #[test]
     #[expected_failure(abort_code = 2)]
     fun test_modify_bad_king_move() {
-        use ethos::chess_board::{new, modify};
-
         let board = new();
         modify(&mut board, PLAYER1, 1, 3, 2, 3);
         modify(&mut board, PLAYER1, 2, 3, 3, 3);
@@ -287,8 +301,6 @@ module ethos::chess_board_tests {
     #[test]
     #[expected_failure(abort_code = 2)]
     fun test_modify_bad_queen_move() {
-        use ethos::chess_board::{new, modify};
-
         let board = new();
         modify(&mut board, PLAYER1, 1, 4, 2, 4);
         modify(&mut board, PLAYER1, 2, 4, 3, 4);
@@ -301,8 +313,6 @@ module ethos::chess_board_tests {
 
     #[test]
     fun test_modify_queen_diagonal_move() {
-        use ethos::chess_board::{new, modify, piece_at_access};
-
         let board = new();
         modify(&mut board, PLAYER1, 1, 4, 2, 4);
         modify(&mut board, PLAYER1, 2, 4, 3, 4);

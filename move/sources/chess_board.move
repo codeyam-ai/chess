@@ -107,7 +107,7 @@ module ethos::chess_board {
         let piece = option::extract(old_space);
         assert!(piece.player_number == player_number, EWRONG_PLAYER);
 
-        assert!(is_valid_move(piece, from_row, from_col, to_row, to_col), EBAD_DESTINATION);
+        assert!(is_valid_move(&board.spaces, piece, from_row, from_col, to_row, to_col), EBAD_DESTINATION);
         let new_space = space_at_mut(board, to_row, to_col);
 
         if (option::is_some(new_space)) {
@@ -155,8 +155,8 @@ module ethos::chess_board {
         spaces_at_mut(&mut board.spaces, row_index, column_index)
     }
 
-    public(friend) fun piece_at(board: &ChessBoard, row: u64, column: u64): ChessPiece {
-        let option = space_at(board, row, column);
+    public(friend) fun piece_at_space(spaces: &vector<vector<Option<ChessPiece>>>, row: u64, column: u64): ChessPiece {
+        let option = spaces_at(spaces, row, column);
         
         if (option::is_none(option)) {
             return ChessPiece { 
@@ -166,6 +166,10 @@ module ethos::chess_board {
         };
 
         *option::borrow(option)
+    }
+
+    public(friend) fun piece_at(board: &ChessBoard, row: u64, column: u64): ChessPiece {
+        piece_at_space(&board.spaces, row, column)
     }
 
     public(friend) fun piece_at_access(board: &ChessBoard, row: u64, column: u64): (u8, u8) {
@@ -207,15 +211,50 @@ module ethos::chess_board {
         }
     }
 
-    fun is_valid_move(piece: ChessPiece, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
+    fun is_valid_move(
+      spaces: &vector<vector<Option<ChessPiece>>>, 
+      piece: ChessPiece, 
+      from_row: u64, 
+      from_col: u64,
+      to_row: u64, 
+      to_col: u64
+    ): bool {
         if (piece.type == PAWN) {
             if (piece.player_number == PLAYER1) {
-                if (from_row + 1 == to_row && from_col == to_col) {
+                if (from_row + 2 == to_row) {
+                    let over_piece = piece_at_space(spaces, from_row + 1, from_col);
+                    if (over_piece.player_number == EMPTY || over_piece.player_number == PLAYER2) {
+                        return false
+                    };
                     return true
+                } else if (from_row + 1 == to_row) {
+                    if (from_col == to_col) {
+                        return true
+                    } else if (from_col + 1 == to_col || to_col + 1 == from_col) {
+                        let capture_piece = piece_at_space(spaces, from_row + 1, from_col);
+                        if (capture_piece.player_number == PLAYER2) {
+                            return true
+                        };
+                        return false
+                    }
                 }
             } else {
-                if (from_row == to_row + 1 && from_col == to_col) {
+                if (to_row + 2 == from_row) {
+                    let over_piece = piece_at_space(spaces, to_row + 1, to_col);
+                    if (over_piece.player_number == EMPTY || over_piece.player_number == PLAYER1) {
+                        return false
+                    };
                     return true
+                } else if (to_row + 1 == from_row) {
+                    if (from_col == to_col) {
+                        return true
+                    } else if (from_col + 1 == to_col || to_col + 1 == from_col) {
+                        let capture_piece = piece_at_space(spaces, to_row + 1, from_col);
+                        if (capture_piece.player_number == PLAYER1) {
+                            return true
+                        };
+                        return false
+                    }
                 }
             }
         } else if (piece.type == ROOK) {
