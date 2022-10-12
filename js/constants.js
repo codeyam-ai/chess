@@ -1,5 +1,5 @@
 module.exports = {
-  contractAddress: "0x8a4a806fa7f0b668da7405e411d64f2cdf7b67e1",
+  contractAddress: "0xfc629c48495e2cc0d2b1c6a5bdc1f621123dce4d",
 //   leaderboardAddress: "0xb78e709f4897d0cd731d55d87773037cec1b95f2"
   pieces: {
     '11': `
