@@ -26,7 +26,7 @@ const constructTransaction = (selected, destination, activeGameAddress) => {
   }
 }
 
-const execute = async (walletSigner, selected, destination, activeGameAddress, onComplete) => {
+const execute = async (walletSigner, selected, destination, activeGameAddress, onComplete, onError) => {
   const details = constructTransaction(selected, destination, activeGameAddress);
 
   ethos.transact({

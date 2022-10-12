@@ -19190,13 +19190,13 @@ function handleResult(newBoard) {
   board.display(newBoard)
 }
 
-function showGasError() {
-  removeClass(eById("error-gas"), 'hidden');
-}
-
-function showUnknownError(error) {
+function handleError(error) {
   eById('error-unknown-message').innerHTML = error;
   removeClass(eById("error-unknown"), 'hidden');
+}
+
+function showGasError() {
+  removeClass(eById("error-gas"), 'hidden');
 }
 
 function showInvalidMoveError() {
@@ -19308,9 +19308,9 @@ async function setPieceToMove(e) {
     node = node.parentNode;
   }
 
-  if (selectedPiece) {
+  if (selectedPiece && selectedPiece !== node) {
     addClass(node, 'destination');
-    moves.execute(walletSigner, selectedPiece.dataset, node.dataset, activeGameAddress, handleResult)
+    moves.execute(walletSigner, selectedPiece.dataset, node.dataset, activeGameAddress, handleResult, handleError)
   } else {
     addClass(node, 'selected');
     selectedPiece = node;
@@ -19567,7 +19567,7 @@ const constructTransaction = (selected, destination, activeGameAddress) => {
   }
 }
 
-const execute = async (walletSigner, selected, destination, activeGameAddress, onComplete) => {
+const execute = async (walletSigner, selected, destination, activeGameAddress, onComplete, onError) => {
   const details = constructTransaction(selected, destination, activeGameAddress);
 
   ethos.transact({

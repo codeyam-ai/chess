@@ -16,7 +16,7 @@ module ethos::chess_tests {
         {
             chess::create_game(PLAYER2, test_scenario::ctx(scenario));
         };
-
+  
         test_scenario::next_tx(scenario, &PLAYER1);
         {
             let game_wrapper = test_scenario::take_shared<ChessGame>(scenario);
