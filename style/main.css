@@ -18,6 +18,12 @@ a:visited {
   text-decoration: none;
 }
 
+input {
+  padding: 6px;
+  border-radius: 12px;
+  width: 80%;
+}
+
 .signed-in .signed-out {
   display: none !important;
 }

@@ -56,7 +56,13 @@
           </div>
           <div id="mint-message" class="message hidden">
             <div class="subtitle">Mint New Game</div>
-            <p>To start playing you must first mint a new game as an NFT:</p>
+            <div id="player2-error" class="hidden error">
+              Please provide the wallet address of your opponent to mint the game.
+            </div>
+            <p>
+              Who would you like to play against?
+              <input id='player2-address' type="text" placeholder="Opponent Address: 0x..." />
+            </p>
             <div id="mint-game"></div>
           </div>
           <div id="top-tile-message" class="message text-center hidden">

@@ -19213,7 +19213,9 @@ async function loadWalletContents() {
   const balance = (walletContents.balance || "").toString();
 
   if (balance < 5000000) {
+    console.log("HI BALANCE", balance)
     const success = await ethos.dripSui({ address });
+    console.log("HI2", success)
     
     if (success) {
       removeClass(eById('faucet'), 'hidden');
@@ -19233,7 +19235,9 @@ async function loadGames() {
   const gamesElement = eById('games-list');
   gamesElement.innerHTML = "";
   
+  console.log("HI1")
   await loadWalletContents();
+  console.log("HI2")
   
   addClass(eById('loading-games'), 'hidden');
   
@@ -19265,6 +19269,7 @@ async function loadGames() {
       };
     }
   )
+  console.log("HI3")
 
   if (!games || games.length === 0) {
     const newGameArea = document.createElement('DIV');
@@ -19375,6 +19380,7 @@ const initializeClicks = () => {
 const onWalletConnected = async ({ signer }) => {
   walletSigner = signer;
   if (signer) {
+    const address = await signer.getAddress();
     modal.close();
   
     addClass(document.body, 'signed-in');
@@ -19390,6 +19396,14 @@ const onWalletConnected = async ({ signer }) => {
         setOnClick(
           mintButton,
           async () => {
+            const player2 = eById('player2-address').value;
+            if (!player2 || player2.length === 0 || player2 === address) {
+              removeClass(eById('player2-error'), 'hidden');
+              return;
+            } else {
+              addClass(eById('player2-error'), 'hidden');
+            }
+
             modal.open('loading', 'container');
 
             const details = {
@@ -19397,7 +19411,7 @@ const onWalletConnected = async ({ signer }) => {
               address: contractAddress,
               moduleName: 'chess',
               functionName: 'create_game',
-              inputValues: ["0xede0572dbe60ac1c2210715aefc5818d73995bea"],
+              inputValues: [player2],
               gasBudget: 5000
             };
         
@@ -19465,8 +19479,6 @@ const onWalletConnected = async ({ signer }) => {
     }
     
     removeClass(document.body, 'signed-out');
-
-    const address = await signer.getAddress();
 
     setOnClick(
       eById('copy-address'),
