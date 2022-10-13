@@ -189,6 +189,39 @@ module ethos::chess_board_tests {
     }
 
     #[test]
+    fun test_modify_pawn_move_2_spaces() {
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 1, 3, 1);
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    fun test_modify_pawn_move_2_spaces_player2() {
+        let board = new();
+        modify(&mut board, PLAYER2, 6, 1, 4, 1);
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 2)]
+    fun test_modify_bad_pawn_move_2_spaces() {
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 1, 3, 1);
+        modify(&mut board, PLAYER1, 3, 1, 5, 1);
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 2)]
+    fun test_modify_bad_pawn_move_2_spaces_player2() {
+        let board = new();
+        modify(&mut board, PLAYER2, 6, 1, 4, 1);
+        modify(&mut board, PLAYER2, 4, 1, 2, 1);
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
     #[expected_failure(abort_code = 2)]
     fun test_modify_bad_pawn_move_3() {
         let board = new();

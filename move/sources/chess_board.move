@@ -221,17 +221,16 @@ module ethos::chess_board {
     ): bool {
         if (piece.type == PAWN) {
             if (piece.player_number == PLAYER1) {
-                if (from_row + 2 == to_row) {
+                if (from_row == 1 && from_row + 2 == to_row && from_col == to_col) {
                     let over_piece = piece_at_space(spaces, from_row + 1, from_col);
-                    if (over_piece.player_number == EMPTY || over_piece.player_number == PLAYER2) {
-                        return false
-                    };
-                    return true
+                    if (over_piece.player_number == EMPTY) {
+                        return true
+                    }
                 } else if (from_row + 1 == to_row) {
                     if (from_col == to_col) {
                         return true
                     } else if (from_col + 1 == to_col || to_col + 1 == from_col) {
-                        let capture_piece = piece_at_space(spaces, from_row + 1, from_col);
+                        let capture_piece = piece_at_space(spaces, to_row, to_col);
                         if (capture_piece.player_number == PLAYER2) {
                             return true
                         };
@@ -239,17 +238,16 @@ module ethos::chess_board {
                     }
                 }
             } else {
-                if (to_row + 2 == from_row) {
+                if (from_row == 6 && to_row + 2 == from_row && from_col == to_col) {
                     let over_piece = piece_at_space(spaces, to_row + 1, to_col);
-                    if (over_piece.player_number == EMPTY || over_piece.player_number == PLAYER1) {
-                        return false
-                    };
-                    return true
+                    if (over_piece.player_number == EMPTY) {
+                        return true
+                    }
                 } else if (to_row + 1 == from_row) {
                     if (from_col == to_col) {
                         return true
                     } else if (from_col + 1 == to_col || to_col + 1 == from_col) {
-                        let capture_piece = piece_at_space(spaces, to_row + 1, from_col);
+                        let capture_piece = piece_at_space(spaces, to_row, to_col);
                         if (capture_piece.player_number == PLAYER1) {
                             return true
                         };
