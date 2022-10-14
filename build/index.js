@@ -18880,7 +18880,7 @@ module.exports = {
 }
 },{"./constants":5,"./utils":9}],5:[function(require,module,exports){
 module.exports = {
-  contractAddress: "0xfc629c48495e2cc0d2b1c6a5bdc1f621123dce4d",
+  contractAddress: "0x8403c244de8b0b56e66b4522935a40d0cb10d05e",
   pieces: {
     '11': `
       <svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="0 0 2048 2048" id="svg2" version="1.1" inkscape:version="0.48.2 r9819" width="100%" height="100%" sodipodi:docname="wp.svg">
@@ -19263,7 +19263,6 @@ async function loadGames() {
       };
     }
   )
-  console.log("HI3")
 
   if (!games || games.length === 0) {
     const newGameArea = document.createElement('DIV');
@@ -19279,7 +19278,6 @@ async function loadGames() {
 }
 
 async function setActiveGame(game) {
-  console.log("GAME", game)
   activeGameAddress = game.address;
 
   eById('transactions-list').innerHTML = "";
@@ -19293,6 +19291,9 @@ async function setActiveGame(game) {
   modal.close();
   removeClass(eById("game"), 'hidden');
   addClass(eByClass('play-button'), 'selected')
+  addClass(eById('verifiable-top'), 'hidden');
+  removeClass(eById('verifiable-bottom'), 'hidden');
+  removeClass(eById('move-instructions'), 'hidden');
 }
 
 async function setPieceToMove(e) {

@@ -118,11 +118,7 @@ input {
 
 .header-title {
   font-variant: small-caps;
-  font-weight: 300;
-}
-
-.header-title span {
-  font-weight: 500;
+  font-size: 24px;
 }
 
 .header-buttons {
@@ -150,6 +146,10 @@ input {
   display: flex;
   justify-content: end;
   position: relative;
+}
+
+.start-button {
+  white-space: nowrap;
 }
 
 #sui-address {
