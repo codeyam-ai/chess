@@ -98,7 +98,7 @@ input {
 }
 
 .content {
-  width: 900px;
+  width: 600px;
   margin: auto;
   display: flex;
   flex-direction: column;
@@ -117,7 +117,6 @@ input {
 }
 
 .header-title {
-  flex: 1;
   font-variant: small-caps;
   font-weight: 300;
 }
@@ -148,7 +147,6 @@ input {
 }
 
 .header-address {
-  flex: 1;
   display: flex;
   justify-content: end;
   position: relative;
@@ -277,7 +275,7 @@ input {
 
 .instructions {
   text-align: center;
-  padding: 24px 0;
+  padding: 0 90px;
   font-weight: 300;
 }
 
@@ -413,221 +411,6 @@ input {
   font-size: xx-large;
 }
 
-.left1,
-.left2,
-.left3,
-.right1,
-.right2,
-.right3,
-.up1,
-.up2,
-.up3,
-.down1,
-.down2,
-.down3 {
-  animation-duration: 0.15s;
-  animation-timing-function: linear;
-  animation-iteration-count: 1;
-  position: relative;
-}
-
-.left1 {
-  animation-name: left1;
-}
-
-.left2 {
-  animation-name: left2;
-}
-
-.left3 {
-  animation-name: left3;
-}
-
-.right1 {
-  animation-name: right1;
-}
-
-.right2 {
-  animation-name: right2;
-}
-
-.right3 {
-  animation-name: right3;
-}
-
-.up1 {
-  animation-name: up1;
-}
-
-.up2 {
-  animation-name: up2;
-}
-
-.up3 {
-  animation-name: up3;
-}
-
-.down1 {
-  animation-name: down1;
-}
-
-.down2 {
-  animation-name: down2;
-}
-
-.down3 {
-  animation-name: down3;
-}
-
-.color1 {
-  background-color: #97e0ff;
-}
-
-.color2 {
-  background-color: #8cd0ff;
-}
-
-.color3 {
-  background-color: #81bfff;
-}
-
-.color4 {
-  background-color: #75afff;
-}
-
-.color5 {
-  background-color: #6a9eff;
-}
-
-.color6 {
-  background-color: #5f8eff;
-}
-
-.color7 {
-  background-color: #547eff;
-}
-
-.color8 {
-  background-color: #496dff;
-}
-
-.color9 {
-  background-color: #3d5dff;
-}
-
-.color10 {
-  background-color: #324cff;
-}
-
-.color11 {
-  background-color: #273cff;
-}
-
-.color12 {
-  background-color: #001aff;
-}
-
-.color13 {
-  background-color: #ffc700;
-}
-
-.merge {
-  animation-name: merge;
-  animation-duration: 0.5s;
-  animation-iteration-count: 1;
-  animation-direction: alternate;
-}
-
-@keyframes left1 {
-  to {
-    margin-left: -106px;
-  }
-}
-
-@keyframes left2 {
-  to {
-    margin-left: -212px;
-  }
-}
-
-@keyframes left3 {
-  to {
-    margin-left: -318px;
-  }
-}
-
-@keyframes right1 {
-  to {
-    margin-left: 106px;
-  }
-}
-
-@keyframes right2 {
-  to {
-    margin-left: 212px;
-  }
-}
-
-@keyframes right3 {
-  to {
-    margin-left: 318px;
-  }
-}
-
-@keyframes up1 {
-  to {
-    margin-top: -106px;
-  }
-}
-
-@keyframes up2 {
-  to {
-    margin-top: -212px;
-  }
-}
-
-@keyframes up3 {
-  to {
-    margin-top: -318px;
-  }
-}
-
-@keyframes down1 {
-  to {
-    margin-top: 106px;
-  }
-}
-
-@keyframes down2 {
-  to {
-    margin-top: 212px;
-  }
-}
-
-@keyframes down3 {
-  to {
-    margin-top: 318px;
-  }
-}
-
-@keyframes merge {
-  40% {
-    width: 110px;
-    height: 110px;
-    margin: -5px;
-  }
-  75% {
-    width: 80px;
-    height: 80px;
-    margin: 10px;
-  }
-  100% {
-    width: 100px;
-    height: 100px;
-    margin: 0;
-  }
-}
-
 .error {
   padding: 0 12px;
   background-color: #ffcccb;
@@ -749,8 +532,7 @@ a:visited.link-button {
   font-size: 14px;
 }
 
-.games-title,
-.leader-title {
+.games-title {
   height: 48px;
   display: flex;
   justify-content: space-between;
@@ -758,6 +540,10 @@ a:visited.link-button {
   border-bottom: 1px solid #e5e5e7;
   font-size: large;
   font-weight: 500;
+}
+
+#games-list {
+  text-align: center;
 }
 
 #transactions {
@@ -842,32 +628,6 @@ a:visited.link-button {
   font-size: small;
 }
 
-.leader-stats {
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  font-size: small;
-  font-weight: 600;
-}
-
-.leader-tile {
-  width: 36px;
-  height: 36px;
-  border-radius: 9px;
-  font-size: small;
-  color: white;
-  margin-left: 24px;
-}
-
-.leader-tile {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  align-items: center;
-  margin: 0;
-  font-size: small;
-}
-
 .for-developers {
   width: 480px;
   margin: 60px auto 30px auto;
@@ -885,51 +645,6 @@ a:visited.link-button {
 
 .for-developers .subsubtitle {
   font-weight: 600;
-}
-
-#score-diff {
-  position: absolute;
-  background-color: white;
-  border-radius: 15px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 30px;
-  width: 30px;
-  font-size: small;
-}
-
-.stationary {
-  opacity: 0;
-  top: 10px;
-  transform: scale(0);
-  left: 42px;
-}
-
-.floating {
-  animation: float;
-  animation-duration: 2s;
-  animation-timing-function: linear;
-  animation-iteration-count: 1;
-}
-
-@keyframes float {
-  25% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  75% {
-    opacity: 1;
-  }
-  100% {
-    top: -60px;
-    opacity: 0;
-  }
-}
-
-.top-tile-display img {
-  height: 150px;
-  width: 150px;
 }
 
 #faucet {

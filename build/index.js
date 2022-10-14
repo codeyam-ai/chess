@@ -18881,7 +18881,6 @@ module.exports = {
 },{"./constants":5,"./utils":9}],5:[function(require,module,exports){
 module.exports = {
   contractAddress: "0xfc629c48495e2cc0d2b1c6a5bdc1f621123dce4d",
-//   leaderboardAddress: "0xb78e709f4897d0cd731d55d87773037cec1b95f2"
   pieces: {
     '11': `
       <svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="0 0 2048 2048" id="svg2" version="1.1" inkscape:version="0.48.2 r9819" width="100%" height="100%" sodipodi:docname="wp.svg">
@@ -19230,16 +19229,11 @@ async function loadGames() {
     setTimeout(loadGames, 500);
     return;
   }
-  removeClass(eById('loading-games'), 'hidden');
-
+  
   const gamesElement = eById('games-list');
   gamesElement.innerHTML = "";
   
-  console.log("HI1")
   await loadWalletContents();
-  console.log("HI2")
-  
-  addClass(eById('loading-games'), 'hidden');
   
   // const playerCaps = [
   //     {

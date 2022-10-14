@@ -105,16 +105,11 @@ async function loadGames() {
     setTimeout(loadGames, 500);
     return;
   }
-  removeClass(eById('loading-games'), 'hidden');
-
+  
   const gamesElement = eById('games-list');
   gamesElement.innerHTML = "";
   
-  console.log("HI1")
   await loadWalletContents();
-  console.log("HI2")
-  
-  addClass(eById('loading-games'), 'hidden');
   
   // const playerCaps = [
   //     {
@@ -144,7 +139,6 @@ async function loadGames() {
       };
     }
   )
-  console.log("HI3")
 
   if (!games || games.length === 0) {
     const newGameArea = document.createElement('DIV');
@@ -160,7 +154,6 @@ async function loadGames() {
 }
 
 async function setActiveGame(game) {
-  console.log("GAME", game)
   activeGameAddress = game.address;
 
   eById('transactions-list').innerHTML = "";
