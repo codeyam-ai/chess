@@ -84,13 +84,10 @@ async function loadWalletContents() {
   const address = await walletSigner.getAddress();
   eById('wallet-address').innerHTML = truncateMiddle(address, 4);
   walletContents = await ethos.getWalletContents(address, 'sui');
-  console.log("WALLET CONTENTS", walletContents)
   const balance = (walletContents.balance || "").toString();
 
   if (balance < 5000000) {
-    console.log("HI BALANCE", balance)
     const success = await ethos.dripSui({ address });
-    console.log("HI2", success)
     
     if (success) {
       removeClass(eById('faucet'), 'hidden');
@@ -154,7 +151,15 @@ async function loadGames() {
 }
 
 async function setActiveGame(game) {
+  const address = await walletSigner.getAddress();
   activeGameAddress = game.address;
+
+  if (game.current_player === address) {
+    isCurrentPlayer = true;
+    removeClass(eById('current-player'), 'hidden');
+  } else {
+    removeClass(eById('not-current-player'), 'hidden');
+  }
 
   eById('transactions-list').innerHTML = "";
   moves.reset();
@@ -231,6 +236,7 @@ const initializeClicks = () => {
     eByClass('play-button'), 
     () => {
       if (games && games.length > 0) {
+        console.log("GAMES", games)
         removeClass(eById('game'), 'hidden');
         setActiveGame(games[0]);
       } else if (walletSigner) {
