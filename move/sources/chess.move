@@ -80,7 +80,7 @@ module ethos::chess {
         let name = string::utf8(b"Ethos Chess");
         let description = string::utf8(b"Chess - built on Sui  - by Ethos");
         let board_spaces = *chess_board::spaces(&new_board);
-        let url = url::new_unsafe_from_bytes(b"https://ChessBoard.png");
+        let url = url::new_unsafe_from_bytes(b"https://arweave.net/ZUrXvtGA19RqxjUZ6QXHIy_W2MyctjGZLtMZheslvPo");
         
         let game = ChessGame {
             id: game_uid,
