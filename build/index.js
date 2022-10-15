@@ -19726,6 +19726,8 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
     signer: walletSigner, 
     details,
     onCompleted: async ({ data }) => {
+      ethos.hideWallet();
+      
       if (data?.effects?.status?.error === "InsufficientGas") {
         onError()
         return;
@@ -19808,8 +19810,6 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
       // removeClass(eById('transactions'), 'hidden');
     }
   })
-
-  ethos.hideWallet();
 }
 
 const reset = () => moves = []
