@@ -19334,9 +19334,15 @@ async function loadGames() {
 }
 
 async function listGames() {
-  const address = await walletSigner.getAddress();
   const gamesList = eById('games-list');
-  removeClass(gamesList, 'hidden')
+  if (games.length < 2) {
+    addClass(gamesList, 'hidden')
+    return;
+  } else {
+    removeClass(gamesList, 'hidden')
+  }
+  
+  const address = await walletSigner.getAddress();
 
   // for (const gameItem of eByClass('game-item')) {
   //   gameItem.parentNode.remove(gameItem);
@@ -19372,8 +19378,12 @@ async function setActiveGame(game) {
   activeGameAddress = game.address;
 
   removeClass(eByClass('game-item'), 'hidden');
-  addClass(eById(`game-${game.address}`), 'hidden');
-
+  
+  const activeGameItem = eById(`game-${game.address}`);
+  if (activeGameItem) {
+    addClass(activeGameItem, 'hidden');
+  } 
+  
   const playerColor = game.player1 === address ? 'white' : 'black';
   eById('player-color').innerHTML = playerColor;
  
