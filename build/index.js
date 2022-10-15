@@ -19146,7 +19146,7 @@ const { active } = require('./board');
 const DASHBOARD_LINK = 'https://ethoswallet.xyz/dashboard';
 
 let walletSigner;
-let yourTurn;
+let isCurrentPlayer;
 let games;
 let activeGameAddress;
 let walletContents = {};
@@ -19195,7 +19195,7 @@ async function pollForNextMove() {
 
   const { details: { data: { fields: game } } } = sharedObject;
   if (game.current_player === address) {
-    isCurrentPlayer = false;
+    isCurrentPlayer = true;
     removeClass(eById('current-player'), 'hidden');
     addClass(eById('not-current-player'), 'hidden')
 
@@ -19211,7 +19211,9 @@ async function handleResult(newBoard) {
   selectedPiece = null;
 
   if (!newBoard) {
-    showInvalidMoveError()
+    showInvalidMoveError();
+    removeClass(eByClass('selected'), 'selected')
+    removeClass(eByClass('destination'), 'destination')
     return;
   }
 
@@ -19391,7 +19393,7 @@ async function setActiveGame(game) {
 }
 
 async function setPieceToMove(e) {
-  if (!yourTurn) {
+  if (!isCurrentPlayer) {
     showNotYourTurnError();
     return;
   }
