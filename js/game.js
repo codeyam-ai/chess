@@ -15,6 +15,7 @@ const {
 const modal = require('./modal');
 const board = require('./board');
 const moves = require('./moves');
+const { active } = require('./board');
 
 const DASHBOARD_LINK = 'https://ethoswallet.xyz/dashboard';
 
@@ -25,6 +26,7 @@ let activeGameAddress;
 let walletContents = {};
 let contentsInterval;
 let selectedPiece;
+let faucetUsed = false;
 
 function init() {
   // test();
@@ -58,15 +60,42 @@ function init() {
   initializeClicks();
 }
 
+async function pollForNextMove() {
+  if (!walletSigner) return;
+
+  const provider = new JsonRpcProvider('https://gateway.devnet.sui.io/');
+  const sharedObject = await provider.getObject(activeGameAddress);
+  const address = await walletSigner.getAddress()
+
+  const { details: { data: { fields: game } } } = sharedObject;
+  if (game.current_player === address) {
+    isCurrentPlayer = false;
+    removeClass(eById('current-player'), 'hidden');
+    addClass(eById('not-current-player'), 'hidden')
+
+    const boards = game.boards;
+    const activeBoard = board.convertInfo(boards[boards.length - 1]);
+    board.display(activeBoard);
+  } else {
+    setTimeout(pollForNextMove, 3000);
+  }
+}
+
 async function handleResult(newBoard) { 
+  selectedPiece = null;
+
+  if (!newBoard) {
+    showInvalidMoveError()
+    return;
+  }
+
   isCurrentPlayer = false;
   addClass(eById('current-player'), 'hidden');
   removeClass(eById('not-current-player'), 'hidden')
 
-  if (!newBoard) {
-    showInvalidMoveError()
-  }
   board.display(newBoard)
+
+  pollForNextMove();
 }
 
 function handleError(error) {
@@ -197,6 +226,9 @@ async function setActiveGame(game) {
   const address = await walletSigner.getAddress();
   activeGameAddress = game.address;
 
+  const playerColor = game.player1 === address ? 'white' : 'black';
+  eById('player-color').innerHTML = playerColor;
+ 
   if (game.current_player === address) {
     isCurrentPlayer = true;
     removeClass(eById('current-player'), 'hidden');
@@ -277,7 +309,6 @@ const initializeClicks = () => {
     eByClass('play-button'), 
     () => {
       if (games && games.length > 0) {
-        console.log("GAMES", games)
         removeClass(eById('game'), 'hidden');
         setActiveGame(games[0]);
       } else if (walletSigner) {

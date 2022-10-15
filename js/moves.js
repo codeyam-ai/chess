@@ -51,6 +51,7 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
 
       if (!events) {
         onComplete();
+        return;
       }
 
       const event = events[0].moveEvent;
