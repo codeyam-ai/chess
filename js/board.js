@@ -1,5 +1,5 @@
 const { pieces } = require("./constants");
-const { eById, eByClass, addClass, removeClass, isReverse, isVertical } = require("./utils");
+const { eByClass, removeClass, isReverse, isVertical } = require("./utils");
 
 let active;
 

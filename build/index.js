@@ -18816,7 +18816,7 @@ if (process.env.NODE_ENV === 'production') {
 }).call(this)}).call(this,require('_process'))
 },{"./ethos-wallet-beta.dev.cjs":1,"./ethos-wallet-beta.prod.cjs":2,"_process":43}],4:[function(require,module,exports){
 const { pieces } = require("./constants");
-const { eById, eByClass, addClass, removeClass, isReverse, isVertical } = require("./utils");
+const { eByClass, removeClass, isReverse, isVertical } = require("./utils");
 
 let active;
 
@@ -19226,7 +19226,7 @@ async function handleResult(newBoard) {
     removeClass(eByClass('destination'), 'destination')
     return;
   }
-  
+
   if (newBoard.gameOver || (newBoard.winner && !newBoard.winner.fields)) {
     const address = await walletSigner.getAddress();
     if (newBoard.winner === address) {
@@ -19241,7 +19241,7 @@ async function handleResult(newBoard) {
   addClass(eById('current-player'), 'hidden');
   removeClass(eById('not-current-player'), 'hidden')
 
-  board.display(newBoard)
+  board.display(newBoard);
 
   pollForNextMove();
 }
@@ -19749,13 +19749,15 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
         return;
       }
 
-      const event = events[0].moveEvent;
-      
-      if (event.fields.winner) {
-        onComplete(event.fields);
+      let event
+      if (events.length === 2) {
+        onComplete(events[0].moveEvent.fields);
+        event = events[1].moveEvent;
       } else {
-        onComplete(board.convertInfo(event));
+        event = events[0].moveEvent;
       }
+      
+      onComplete(board.convertInfo(event));
       
       // const { fields } = event;
       // const { last_tile: lastTile } = fields;

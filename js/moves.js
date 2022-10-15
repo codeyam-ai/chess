@@ -56,13 +56,15 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
         return;
       }
 
-      const event = events[0].moveEvent;
-      
-      if (event.fields.winner) {
-        onComplete(event.fields);
+      let event
+      if (events.length === 2) {
+        onComplete(events[0].moveEvent.fields);
+        event = events[1].moveEvent;
       } else {
-        onComplete(board.convertInfo(event));
+        event = events[0].moveEvent;
       }
+      
+      onComplete(board.convertInfo(event));
       
       // const { fields } = event;
       // const { last_tile: lastTile } = fields;

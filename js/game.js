@@ -99,7 +99,7 @@ async function handleResult(newBoard) {
     removeClass(eByClass('destination'), 'destination')
     return;
   }
-  
+
   if (newBoard.gameOver || (newBoard.winner && !newBoard.winner.fields)) {
     const address = await walletSigner.getAddress();
     if (newBoard.winner === address) {
@@ -114,7 +114,7 @@ async function handleResult(newBoard) {
   addClass(eById('current-player'), 'hidden');
   removeClass(eById('not-current-player'), 'hidden')
 
-  board.display(newBoard)
+  board.display(newBoard);
 
   pollForNextMove();
 }
