@@ -51,6 +51,7 @@ module.exports = {
       spaces: rawSpaces, 
       board_spaces: rawBoardSpaces,
       player: previousPlayer, 
+      winner: winner,
       game_over: gameOver
     } = board.fields || board;
     const spaces = (rawSpaces || rawBoardSpaces).map(
@@ -60,6 +61,6 @@ module.exports = {
         }
       )
     )
-    return { spaces, previousPlayer, gameOver }
+    return { spaces, previousPlayer, winner, gameOver }
   }
 }

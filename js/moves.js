@@ -56,6 +56,7 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
 
       const event = events[0].moveEvent;
       
+      console.log("EVENT", event);
       onComplete(board.convertInfo(event));
       
       // const { fields } = event;

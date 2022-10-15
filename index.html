@@ -65,6 +65,26 @@
             </p>
             <div id="mint-game"></div>
           </div>
+          <div id="you-winner-message" class="message text-center hidden">
+            <div class='subtitle'>You Win!</div>
+            <p>
+              Congrats on a great game! 
+            </p>
+            <p>
+              Mouse over the menu in
+              the top right corner of your screen to create a new game.
+            </p>
+          </div>
+          <div id="opponent-winner-message" class="message text-center hidden">
+            <div class='subtitle'>You Lost</div>
+            <p>
+              Tough loss!
+            </p> 
+            <p>
+              Mouse over the menu in
+              the top right corner of your screen to create a new game.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -152,7 +172,7 @@
             <p id="current-player" class="hidden">
               <b>It's Your Move:</b> 
               <br/>
-              Click on the piece you want to move (your are <b id='player-color'></b>) and then
+              Click on the piece you want to move (you are <b id='player-color'></b>) and then
               <br/>
               the space you want to move it to.
             </p>
@@ -169,9 +189,6 @@
                 Your games are<br class='narrow'/> completely verifiable on-chain!
               </p>
             </div>
-          </div>
-          <div id="error-game-over" class="error hidden">
-            <div class="subtitle">Game Over</div>
           </div>
           <div id="error-unknown" class="error hidden">
             <div class="close-error">
