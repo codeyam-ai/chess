@@ -18855,17 +18855,19 @@ module.exports = {
   },
   
   clear: () => {
-    const tiles = eByClass('tile');
-    for (const tile of tiles) {
-      tile.innerHTML = "";
+    const spaceElements = eByClass('tile-wrapper');
+    for (const spaceElement of spaceElements) {
+      spaceElement.innerHTML = "";
+      spaceElement.dataset.player = null;
+      spaceElement.dataset.type = null;
     }
   },
 
   convertInfo: (board) => {
-    console.log("BOARD", board)
     const { 
       spaces: rawSpaces, 
-      board_spaces: rawBoardSpaces, 
+      board_spaces: rawBoardSpaces,
+      player: previousPlayer, 
       game_over: gameOver
     } = board.fields || board;
     const spaces = (rawSpaces || rawBoardSpaces).map(
@@ -18875,7 +18877,7 @@ module.exports = {
         }
       )
     )
-    return { spaces, gameOver }
+    return { spaces, previousPlayer, gameOver }
   }
 }
 },{"./constants":5,"./utils":9}],5:[function(require,module,exports){
@@ -19182,7 +19184,11 @@ function init() {
   initializeClicks();
 }
 
-function handleResult(newBoard) { 
+async function handleResult(newBoard) { 
+  isCurrentPlayer = false;
+  addClass(eById('current-player'), 'hidden');
+  removeClass(eById('not-current-player'), 'hidden')
+
   if (!newBoard) {
     showInvalidMoveError()
   }
@@ -19202,6 +19208,49 @@ function showInvalidMoveError() {
   removeClass(eById("error-invalid-move"), 'hidden');
 }
 
+async function syncAccountState() {
+  if (!walletSigner) return;
+  const address =  await walletSigner.getAddress();
+  const provider = new JsonRpcProvider('https://gateway.devnet.sui.io/');
+  await provider.syncAccountState(address);
+}
+
+async function tryDrip() {
+  if (!walletSigner || faucetUsed) return;
+
+  faucetUsed = true;
+
+  const address =  await walletSigner.getAddress();
+
+  let success;
+  try {
+    success = await ethos.dripSui({ address });
+  } catch (e) {
+    console.log("Error with drip", e);
+    faucetUsed = false;
+    return;
+  }
+
+  try {
+    await syncAccountState();
+  } catch (e) {
+    console.log("Error with syncing account state", e);
+  }
+
+  if (!success) {
+    const { balance: balanceCheck } = await ethos.getWalletContents(address, 'sui')
+    if (balance !== balanceCheck) {
+      success = true;      
+    }
+  }
+
+  if (success) {
+    removeClass(eById('faucet'), 'hidden');
+    faucetUsed = true;
+    loadWalletContents();
+  }
+}
+
 async function loadWalletContents() {
   // return;
   if (!walletSigner) return;
@@ -19211,11 +19260,7 @@ async function loadWalletContents() {
   const balance = (walletContents.balance || "").toString();
 
   if (balance < 5000000) {
-    const success = await ethos.dripSui({ address });
-    
-    if (success) {
-      removeClass(eById('faucet'), 'hidden');
-    }
+    tryDrip(address);
   }
 
   eById('balance').innerHTML = balance.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' SUI';
@@ -19298,7 +19343,6 @@ async function setActiveGame(game) {
   addClass(eByClass('play-button'), 'selected')
   addClass(eById('verifiable-top'), 'hidden');
   removeClass(eById('verifiable-bottom'), 'hidden');
-  removeClass(eById('move-instructions'), 'hidden');
 }
 
 async function setPieceToMove(e) {
@@ -19346,8 +19390,7 @@ const initializeClicks = () => {
       addClass(document.body, 'signed-out');
       removeClass(document.body, 'signed-in');
       removeClass(eById('game'), 'hidden');
-      addClass(eById('loading-games'), 'hidden');
-
+      
       board.clear();
       
       modal.open('get-started', 'board', true);
@@ -19497,7 +19540,6 @@ const onWalletConnected = async ({ signer }) => {
     setOnClick(eByClass('new-game'), ethos.showSignInModal)
     addClass(document.body, 'signed-out');
     removeClass(document.body, 'signed-in');
-    addClass(eById('loading-games'), 'hidden');
   }
 }
 
@@ -19592,13 +19634,11 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
       const { computationCost, storageCost, storageRebate } = gasUsed;
 
       if (!events) {
-        console.log("MOVE FAILED", data);
         onComplete();
       }
 
       const event = events[0].moveEvent;
       
-      console.log("EVENT", event)
       onComplete(board.convertInfo(event));
       
       // const { fields } = event;

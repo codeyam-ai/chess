@@ -38,17 +38,19 @@ module.exports = {
   },
   
   clear: () => {
-    const tiles = eByClass('tile');
-    for (const tile of tiles) {
-      tile.innerHTML = "";
+    const spaceElements = eByClass('tile-wrapper');
+    for (const spaceElement of spaceElements) {
+      spaceElement.innerHTML = "";
+      spaceElement.dataset.player = null;
+      spaceElement.dataset.type = null;
     }
   },
 
   convertInfo: (board) => {
-    console.log("BOARD", board)
     const { 
       spaces: rawSpaces, 
-      board_spaces: rawBoardSpaces, 
+      board_spaces: rawBoardSpaces,
+      player: previousPlayer, 
       game_over: gameOver
     } = board.fields || board;
     const spaces = (rawSpaces || rawBoardSpaces).map(
@@ -58,6 +60,6 @@ module.exports = {
         }
       )
     )
-    return { spaces, gameOver }
+    return { spaces, previousPlayer, gameOver }
   }
 }

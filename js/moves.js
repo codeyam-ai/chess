@@ -50,13 +50,11 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
       const { computationCost, storageCost, storageRebate } = gasUsed;
 
       if (!events) {
-        console.log("MOVE FAILED", data);
         onComplete();
       }
 
       const event = events[0].moveEvent;
       
-      console.log("EVENT", event)
       onComplete(board.convertInfo(event));
       
       // const { fields } = event;
