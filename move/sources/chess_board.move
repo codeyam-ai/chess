@@ -108,19 +108,27 @@ module ethos::chess_board {
         assert!(piece.player_number == player_number, EWRONG_PLAYER);
 
         assert!(is_valid_move(&board.spaces, piece, from_row, from_col, to_row, to_col), EBAD_DESTINATION);
-        let new_space = space_at_mut(board, to_row, to_col);
+        let new_space = space_at(board, to_row, to_col);
 
         if (option::is_some(new_space)) {
             let chess_piece = option::borrow(new_space);
 
             if (chess_piece.player_number != player_number) {
-                option::swap(new_space, piece);
+                if (chess_piece.type == KING) {
+                    board.game_over = true
+                };
+
+                let new_space_mut = space_at_mut(board, to_row, to_col);
+                option::swap(new_space_mut, piece);
+
                 return true
             }
         };
         
         assert!(option::is_none(new_space), EOCCUPIED_SPACE);
-        option::fill(new_space, piece);
+
+        let new_space_mut = space_at_mut(board, to_row, to_col);
+        option::fill(new_space_mut, piece);
 
         true
     }
@@ -131,6 +139,10 @@ module ethos::chess_board {
 
     public fun column_count(): u64 {
         COLUMN_COUNT
+    }
+
+    public fun game_over(board: &ChessBoard): &bool {
+        &board.game_over
     }
 
     public(friend) fun spaces(board: &ChessBoard): &vector<vector<Option<ChessPiece>>> {

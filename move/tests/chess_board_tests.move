@@ -1,7 +1,7 @@
 
 #[test_only]
 module ethos::chess_board_tests {
-    use ethos::chess_board::{ChessBoard, new, modify, empty_space_count, piece_at_access};
+    use ethos::chess_board::{ChessBoard, new, modify, empty_space_count, piece_at_access, game_over};
     use sui::transfer;
 
     const EMPTY: u8 = 0;
@@ -394,6 +394,19 @@ module ethos::chess_board_tests {
     fun test_bad_modify_rook_no_jump() {
         let board = new();
         modify(&mut board, PLAYER1, 0, 0, 3, 0);
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    fun test_game_over() {
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 2, 3, 2);
+        modify(&mut board, PLAYER1, 0, 3, 3, 0);
+        modify(&mut board, PLAYER1, 3, 0, 6, 3);
+        modify(&mut board, PLAYER1, 6, 3, 7, 4);
+        
+        assert!(*game_over(&board), 1);
+
         transfer::share_object(TestChessBoard { board });
     }
 }

@@ -10,6 +10,8 @@ module ethos::chess {
     use ethos::chess_board::{Self, ChessBoard, ChessPiece};
 
     const EINVALID_PLAYER: u64 = 0;
+    const EGAME_OVER: u64 = 1;
+
     const PLAYER1: u8 = 1;
     const PLAYER2: u8 = 2;
 
@@ -66,7 +68,8 @@ module ethos::chess {
 
     struct ChessGameOverEvent has copy, drop {
         game_id: ID,
-        winner: address
+        winner: address,
+        epoch: u64
     }
 
     public entry fun create_game(player2: address, ctx: &mut TxContext) {
@@ -125,7 +128,9 @@ module ethos::chess {
     }
 
     public entry fun make_move(game: &mut ChessGame, from_row: u64, from_column: u64, to_row: u64, to_column: u64, ctx: &mut TxContext) {
-        let player = tx_context::sender(ctx);     
+        let player = tx_context::sender(ctx);  
+        let epoch = tx_context::epoch(ctx);
+
         assert!(game.current_player == player, EINVALID_PLAYER);
 
         let player_number = PLAYER1; 
@@ -134,10 +139,21 @@ module ethos::chess {
         };
 
         let board = current_board_mut(game);
+        assert!(!*chess_board::game_over(board), EGAME_OVER);
+
         let new_board = *board;
         
         chess_board::modify(&mut new_board, player_number, from_row, from_column, to_row, to_column);
         
+        if (*chess_board::game_over(&new_board)) {
+            event::emit(ChessGameOverEvent {
+                game_id: object::uid_to_inner(&game.id),
+                winner: player,
+                epoch
+            });
+            option::fill(&mut game.winner, player);
+        };
+
         if (player == game.player1) {
             game.current_player = *&game.player2;
         } else {
@@ -145,7 +161,6 @@ module ethos::chess {
         };
 
         let board_spaces = *chess_board::spaces(&new_board);
-        let epoch = tx_context::epoch(ctx);
 
         event::emit(ChessMoveEvent {
             game_id: object::uid_to_inner(&game.id),
@@ -228,5 +243,13 @@ module ethos::chess {
 
     public fun player_cap_player_number(player_cap: &ChessPlayerCap): &u8 {
         &player_cap.player_number
+    }
+
+    public fun winner(game: &ChessGame): &Option<address> {
+        &game.winner
+    }
+
+    public fun game_over(game: &ChessGame): &bool {
+        chess_board::game_over(current_board(game))
     }
 }

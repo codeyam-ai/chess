@@ -5,6 +5,7 @@ module ethos::chess_tests {
     use sui::object;
     use ethos::chess::{Self, ChessGame, ChessPlayerCap};
     use ethos::chess_board;
+    use std::option;
    
     const PLAYER1: address = @0xCAFE;
     const PLAYER2: address = @0xA1C05;
@@ -164,7 +165,75 @@ module ethos::chess_tests {
         };
     }
 
-    // #[test]
-    // fun test_game_over() {
-    // }
+    #[test]
+    fun test_game_over() {
+        use ethos::chess::{create_game, make_move, winner, game_over};
+
+        let scenario = &mut test_scenario::begin(&PLAYER1);
+        {
+            create_game(PLAYER2, test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, &PLAYER1);
+        {
+            let game_wrapper = test_scenario::take_shared<ChessGame>(scenario);
+            let game = test_scenario::borrow_mut(&mut game_wrapper);      
+
+            make_move(game, 1, 2, 2, 2, test_scenario::ctx(scenario));
+
+            test_scenario::return_shared<ChessGame>(scenario, game_wrapper);
+        };
+
+        test_scenario::next_tx(scenario, &PLAYER2);
+        {
+            let game_wrapper = test_scenario::take_shared<ChessGame>(scenario);
+            let game = test_scenario::borrow_mut(&mut game_wrapper);      
+
+            make_move(game, 6, 3, 4, 3, test_scenario::ctx(scenario));
+
+            test_scenario::return_shared<ChessGame>(scenario, game_wrapper);
+        };
+
+        test_scenario::next_tx(scenario, &PLAYER1);
+        {
+            let game_wrapper = test_scenario::take_shared<ChessGame>(scenario);
+            let game = test_scenario::borrow_mut(&mut game_wrapper);      
+
+            make_move(game, 0, 3, 3, 0, test_scenario::ctx(scenario));
+
+            test_scenario::return_shared<ChessGame>(scenario, game_wrapper);
+        };
+
+        test_scenario::next_tx(scenario, &PLAYER2);
+        {
+            let game_wrapper = test_scenario::take_shared<ChessGame>(scenario);
+            let game = test_scenario::borrow_mut(&mut game_wrapper);      
+
+            make_move(game, 4, 3, 3, 3, test_scenario::ctx(scenario));
+
+            test_scenario::return_shared<ChessGame>(scenario, game_wrapper);
+        };
+
+        test_scenario::next_tx(scenario, &PLAYER1);
+        {
+            let game_wrapper = test_scenario::take_shared<ChessGame>(scenario);
+            let game = test_scenario::borrow_mut(&mut game_wrapper);      
+
+            make_move(game, 3, 0, 7, 4, test_scenario::ctx(scenario));
+
+            test_scenario::return_shared<ChessGame>(scenario, game_wrapper);
+        };
+
+        test_scenario::next_tx(scenario, &PLAYER2);
+        {
+            let game_wrapper = test_scenario::take_shared<ChessGame>(scenario);
+            let game = test_scenario::borrow_mut(&mut game_wrapper);   
+
+            assert!(*game_over(game), 1);
+            assert!(option::contains(winner(game), &PLAYER1), 2);
+
+            test_scenario::return_shared<ChessGame>(scenario, game_wrapper);
+        }
+
+    }
 }
