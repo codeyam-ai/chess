@@ -19360,6 +19360,7 @@ async function setActiveGame(game) {
     removeClass(eById('current-player'), 'hidden');
   } else {
     removeClass(eById('not-current-player'), 'hidden');
+    pollForNextMove();
   }
 
   eById('transactions-list').innerHTML = "";
