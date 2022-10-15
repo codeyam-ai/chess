@@ -204,9 +204,18 @@ async function loadGames() {
     }
   )
 
+  listGames();
+}
+
+async function listGames() {
   const address = await walletSigner.getAddress();
   const gamesList = eById('games-list');
   removeClass(gamesList, 'hidden')
+
+  // for (const gameItem of eByClass('game-item')) {
+  //   gameItem.parentNode.remove(gameItem);
+  // }
+
   for (const game of games) {
     const gameItem = document.createElement("DIV");
     addClass(gameItem, 'game-item')
@@ -222,11 +231,12 @@ async function loadGames() {
           ${turn}
         </div>
         <div>
-          <button id='game-${game.id}' class='primary-button'>Switch</button>
+          <button id='game-${game.address}' class='primary-button'>Switch</button>
         </div>
       </div>
     `;
     setOnClick(gameItem, () => setActiveGame(game));
+
     gamesList.append(gameItem);
   }
 }
@@ -353,9 +363,6 @@ const onWalletConnected = async ({ signer }) => {
     modal.close();
   
     addClass(document.body, 'signed-in');
-
-    // const response = await ethos.sign({ signer: walletSigner, signData: "YO" });
-    // console.log("SIGN", response);
     
     const prepMint = async () => {
       const mint = eById('mint-game');
@@ -401,6 +408,9 @@ const onWalletConnected = async ({ signer }) => {
               const { board_spaces } = gameData;
               const game = {
                 address: data.effects.created[0].reference.objectId,
+                player1: address,
+                player2,
+                current_player: address,
                 boards: [
                   {
                     board_spaces,
@@ -408,9 +418,13 @@ const onWalletConnected = async ({ signer }) => {
                   }
                 ]
               }
+              
+              games.push(game);
+              await listGames();
               setActiveGame(game);
               ethos.hideWallet();
             } catch (e) {
+              console.log("Error creating new game", e);
               modal.open('create-error', 'container');
               return;
             }
