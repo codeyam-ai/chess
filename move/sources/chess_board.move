@@ -318,6 +318,8 @@ module ethos::chess_board {
             };
             return check_over_space_empty(spaces, from_row, from_col, to_row, to_col)
         } else if (piece.type == KING) {
+            let other_piece = piece_at_space(spaces, to_row, to_col); 
+            if (other_piece.type == ROOK)
             if (
                 (from_row + 1 == to_row || from_row == to_row + 1 || from_row == to_row) &&
                 (from_col + 1 == to_col || from_row == to_col + 1 || from_col == to_col)
