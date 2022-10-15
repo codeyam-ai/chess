@@ -544,6 +544,7 @@ a:visited.link-button {
 
 #games-list {
   text-align: center;
+  border-top: 1px solid #ccc;
 }
 
 #transactions {
@@ -626,6 +627,19 @@ a:visited.link-button {
   justify-content: space-between;
   align-items: center;
   font-size: small;
+}
+
+.game-item>div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+  padding: 12px;
+}
+
+.game-item button {
+  padding: 3px 12px;
+  font-size: 14px;
 }
 
 .for-developers {

@@ -19352,13 +19352,18 @@ async function setActiveGame(game) {
   const address = await walletSigner.getAddress();
   activeGameAddress = game.address;
 
+  removeClass(eByClass('game-item'), 'hidden');
+  addClass(eById(`game-${game.address}`), 'hidden');
+
   const playerColor = game.player1 === address ? 'white' : 'black';
   eById('player-color').innerHTML = playerColor;
  
   if (game.current_player === address) {
     isCurrentPlayer = true;
+    addClass(eById('not-current-player'), 'hidden');
     removeClass(eById('current-player'), 'hidden');
   } else {
+    addClass(eById('current-player'), 'hidden');
     removeClass(eById('not-current-player'), 'hidden');
     pollForNextMove();
   }
@@ -19549,9 +19554,32 @@ const onWalletConnected = async ({ signer }) => {
     } else {
       modal.close();
 
-      // if (games.length === 1) {
-        setActiveGame(games[0]);
-      // }
+      const gamesList = eById('games-list');
+      removeClass(gamesList, 'hidden')
+      for (const game of games) {
+        const gameItem = document.createElement("DIV");
+        addClass(gameItem, 'game-item')
+        gameItem.id = `game-${game.address}`;
+        const otherPlayer = game.player1 === address ? game.player2 : game.player1;
+        const turn = game.current_player === address ? "Your Turn" : "Opponent's Turn";
+        gameItem.innerHTML = `
+          <div>
+            <div>
+              Game vs. ${truncateMiddle(otherPlayer, 6)}
+            </div>
+            <div>
+              ${turn}
+            </div>
+            <div>
+              <button id='game-${game.id}' class='primary-button'>Switch</button>
+            </div>
+          </div>
+        `;
+        setOnClick(gameItem, () => setActiveGame(game));
+        gamesList.append(gameItem);
+      }
+      
+      setActiveGame(games[0]);
     }
     
     removeClass(document.body, 'signed-out');
