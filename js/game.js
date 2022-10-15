@@ -20,7 +20,7 @@ const { active } = require('./board');
 const DASHBOARD_LINK = 'https://ethoswallet.xyz/dashboard';
 
 let walletSigner;
-let playerNumber;
+let yourTurn;
 let games;
 let activeGameAddress;
 let walletContents = {};
@@ -109,6 +109,10 @@ function showGasError() {
 
 function showInvalidMoveError() {
   removeClass(eById("error-invalid-move"), 'hidden');
+}
+
+function showNotYourTurnError() {
+  removeClass(eById("error-not-your-turn"), 'hidden');
 }
 
 async function syncAccountState() {
@@ -261,6 +265,11 @@ async function setActiveGame(game) {
 }
 
 async function setPieceToMove(e) {
+  if (!yourTurn) {
+    showNotYourTurnError();
+    return;
+  }
+
   let node = e.target;
   while (!node.dataset.player) {
     if (!node.parentNode) break;
