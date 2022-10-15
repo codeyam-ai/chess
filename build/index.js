@@ -19227,13 +19227,14 @@ async function handleResult(newBoard) {
     return;
   }
   
-  if (newBoard.gameOver) {
+  if (newBoard.gameOver || (newBoard.winner && !newBoard.winner.fields)) {
     const address = await walletSigner.getAddress();
     if (newBoard.winner === address) {
       modal.open("you-winner", 'board')
     } else {
       modal.open("opponent-winner", 'board')
     }
+    return;
   }
 
   isCurrentPlayer = false;
@@ -19727,7 +19728,7 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
     details,
     onCompleted: async ({ data }) => {
       ethos.hideWallet();
-      
+
       if (data?.effects?.status?.error === "InsufficientGas") {
         onError()
         return;
@@ -19750,8 +19751,11 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
 
       const event = events[0].moveEvent;
       
-      console.log("EVENT", event);
-      onComplete(board.convertInfo(event));
+      if (event.fields.winner) {
+        onComplete(event.fields);
+      } else {
+        onComplete(board.convertInfo(event));
+      }
       
       // const { fields } = event;
       // const { last_tile: lastTile } = fields;

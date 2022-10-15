@@ -100,13 +100,14 @@ async function handleResult(newBoard) {
     return;
   }
   
-  if (newBoard.gameOver) {
+  if (newBoard.gameOver || (newBoard.winner && !newBoard.winner.fields)) {
     const address = await walletSigner.getAddress();
     if (newBoard.winner === address) {
       modal.open("you-winner", 'board')
     } else {
       modal.open("opponent-winner", 'board')
     }
+    return;
   }
 
   isCurrentPlayer = false;
