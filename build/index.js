@@ -19301,19 +19301,8 @@ async function loadGames() {
     return;
   }
   
-  const gamesElement = eById('games-list');
-  gamesElement.innerHTML = "";
-  
   await loadWalletContents();
-  
-  // const playerCaps = [
-  //     {
-  //         "gameId": "0x282f75220a945dac998794e82fbd3f40638f583a"
-  //     },
-  //     {
-  //         "gameId": "0x304594c2b29f3a07458b60fc27f3d30f73790b39"
-  //     }
-  // ];
+
   const playerCaps = walletContents.nfts.filter(
     (nft) => nft.package === contractAddress
   ).map(
@@ -19335,16 +19324,30 @@ async function loadGames() {
     }
   )
 
-  if (!games || games.length === 0) {
-    const newGameArea = document.createElement('DIV');
-    newGameArea.classList.add('text-center');
-    newGameArea.classList.add('padded');
-    newGameArea.innerHTML = `
-      <p>
-        You don't have any games yet.
-      </p>
+  const address = await walletSigner.getAddress();
+  const gamesList = eById('games-list');
+  removeClass(gamesList, 'hidden')
+  for (const game of games) {
+    const gameItem = document.createElement("DIV");
+    addClass(gameItem, 'game-item')
+    gameItem.id = `game-${game.address}`;
+    const otherPlayer = game.player1 === address ? game.player2 : game.player1;
+    const turn = game.current_player === address ? "Your Turn" : "Opponent's Turn";
+    gameItem.innerHTML = `
+      <div>
+        <div>
+          Game vs. ${truncateMiddle(otherPlayer, 6)}
+        </div>
+        <div>
+          ${turn}
+        </div>
+        <div>
+          <button id='game-${game.id}' class='primary-button'>Switch</button>
+        </div>
+      </div>
     `;
-    gamesElement.append(newGameArea);
+    setOnClick(gameItem, () => setActiveGame(game));
+    gamesList.append(gameItem);
   }
 }
 
@@ -19553,32 +19556,6 @@ const onWalletConnected = async ({ signer }) => {
       modal.open('mint', 'board', true);  
     } else {
       modal.close();
-
-      const gamesList = eById('games-list');
-      removeClass(gamesList, 'hidden')
-      for (const game of games) {
-        const gameItem = document.createElement("DIV");
-        addClass(gameItem, 'game-item')
-        gameItem.id = `game-${game.address}`;
-        const otherPlayer = game.player1 === address ? game.player2 : game.player1;
-        const turn = game.current_player === address ? "Your Turn" : "Opponent's Turn";
-        gameItem.innerHTML = `
-          <div>
-            <div>
-              Game vs. ${truncateMiddle(otherPlayer, 6)}
-            </div>
-            <div>
-              ${turn}
-            </div>
-            <div>
-              <button id='game-${game.id}' class='primary-button'>Switch</button>
-            </div>
-          </div>
-        `;
-        setOnClick(gameItem, () => setActiveGame(game));
-        gamesList.append(gameItem);
-      }
-      
       setActiveGame(games[0]);
     }
     
