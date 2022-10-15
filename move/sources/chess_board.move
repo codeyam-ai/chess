@@ -69,10 +69,10 @@ module ethos::chess_board {
                         let piece = create_piece(BISHOP, i==0);
                         vector::push_back(&mut row, option::some(piece));
                     } else if (j == 3) {
-                        let piece = create_piece(KING, i==0);
+                        let piece = create_piece(QUEEN, i==0);
                         vector::push_back(&mut row, option::some(piece));
                     } else if (j == 4) {
-                        let piece = create_piece(QUEEN, i==0);
+                        let piece = create_piece(KING, i==0);
                         vector::push_back(&mut row, option::some(piece));
                     }
                 } else if (i == 1 || i == 6) {
@@ -211,6 +211,36 @@ module ethos::chess_board {
         }
     }
 
+    fun check_over_space_empty(spaces: &vector<vector<Option<ChessPiece>>>, from_row: u64, from_col: u64, to_row: u64, to_col: u64): bool {
+        let over_row = from_row;
+        let over_col = from_col;
+
+        while (true) {
+            if (over_row < to_row) {
+                over_row = over_row + 1
+            } else if (over_row > to_row) {
+                over_row = over_row - 1
+            };
+
+            if (over_col < to_col) {
+                over_col = over_col + 1
+            } else if (over_col > to_col) {
+                over_col = over_col - 1
+            };
+
+            if (over_row == to_row && over_col == to_col) {
+                return true
+            };
+
+            let over_piece = piece_at_space(spaces, over_row, over_col);
+            if (over_piece.player_number != EMPTY) {
+                return false
+            }
+        };
+
+        true
+    }
+
     fun is_valid_move(
       spaces: &vector<vector<Option<ChessPiece>>>, 
       piece: ChessPiece, 
@@ -222,10 +252,7 @@ module ethos::chess_board {
         if (piece.type == PAWN) {
             if (piece.player_number == PLAYER1) {
                 if (from_row == 1 && from_row + 2 == to_row && from_col == to_col) {
-                    let over_piece = piece_at_space(spaces, from_row + 1, from_col);
-                    if (over_piece.player_number == EMPTY) {
-                        return true
-                    }
+                    return check_over_space_empty(spaces, from_row, from_col, to_row, to_col)
                 } else if (from_row + 1 == to_row) {
                     if (from_col == to_col) {
                         return true
@@ -260,7 +287,7 @@ module ethos::chess_board {
                 (from_row == to_row && from_col != to_col) ||
                 (from_row != to_row && from_col == to_col)
             ) {
-                return true
+                return check_over_space_empty(spaces, from_row, from_col, to_row, to_col)
             }
         } else if (piece.type == KNIGHT) {
             if (
@@ -274,7 +301,10 @@ module ethos::chess_board {
         } else if (piece.type == BISHOP) {
             let row_diff = abs_subtract(from_row, to_row);
             let col_diff = abs_subtract(from_col, to_col);
-            return row_diff == col_diff
+            if (row_diff != col_diff) {
+               return false
+            };
+            return check_over_space_empty(spaces, from_row, from_col, to_row, to_col)
         } else if (piece.type == KING) {
             if (
                 (from_row + 1 == to_row || from_row == to_row + 1 || from_row == to_row) &&
@@ -283,12 +313,17 @@ module ethos::chess_board {
                 return true
             }
         } else if (piece.type == QUEEN) {
+            let over_empty = check_over_space_empty(spaces, from_row, from_col, to_row, to_col);
             if (from_row == to_row || from_col == to_col) {
-                return true
+                return over_empty
             } else {
                 let row_diff = abs_subtract(from_row, to_row);
                 let col_diff = abs_subtract(from_col, to_col);
-                return row_diff == col_diff
+                if (row_diff != col_diff) {
+                    return false
+                };
+
+                return over_empty
             }
         };
         

@@ -47,11 +47,11 @@ module ethos::chess_board_tests {
         assert!(player_number == PLAYER1, (player_number as u64));
 
         let (type, player_number) = piece_at_access(&board, 0, 3);
-        assert!(type == KING, (type as u64));
+        assert!(type == QUEEN, (type as u64));
         assert!(player_number == PLAYER1, (player_number as u64));
 
         let (type, player_number) = piece_at_access(&board, 0, 4);
-        assert!(type == QUEEN, (type as u64));
+        assert!(type == KING, (type as u64));
         assert!(player_number == PLAYER1, (player_number as u64));
 
 
@@ -72,11 +72,11 @@ module ethos::chess_board_tests {
         assert!(player_number == PLAYER2, (player_number as u64));
 
         let (type, player_number) = piece_at_access(&board, 7, 3);
-        assert!(type == KING, (type as u64));
+        assert!(type == QUEEN, (type as u64));
         assert!(player_number == PLAYER2, (player_number as u64));
 
         let (type, player_number) = piece_at_access(&board, 7, 4);
-        assert!(type == QUEEN, (type as u64));
+        assert!(type == KING, (type as u64));
         assert!(player_number == PLAYER2, (player_number as u64));
 
         transfer::share_object(TestChessBoard { board })
@@ -322,11 +322,11 @@ module ethos::chess_board_tests {
     #[expected_failure(abort_code = 2)]
     fun test_modify_bad_king_move() {
         let board = new();
-        modify(&mut board, PLAYER1, 1, 3, 2, 3);
-        modify(&mut board, PLAYER1, 2, 3, 3, 3);
-        modify(&mut board, PLAYER1, 3, 3, 4, 3);
-        modify(&mut board, PLAYER1, 0, 3, 1, 3);
-        modify(&mut board, PLAYER1, 1, 3, 3, 3);
+        modify(&mut board, PLAYER1, 1, 4, 2, 4);
+        modify(&mut board, PLAYER1, 2, 4, 3, 4);
+        modify(&mut board, PLAYER1, 3, 4, 4, 4);
+        modify(&mut board, PLAYER1, 0, 4, 1, 4);
+        modify(&mut board, PLAYER1, 1, 4, 3, 4);
 
         transfer::share_object(TestChessBoard { board });
     }
@@ -347,16 +347,53 @@ module ethos::chess_board_tests {
     #[test]
     fun test_modify_queen_diagonal_move() {
         let board = new();
-        modify(&mut board, PLAYER1, 1, 4, 2, 4);
-        modify(&mut board, PLAYER1, 2, 4, 3, 4);
-        modify(&mut board, PLAYER1, 3, 4, 4, 4);
-        modify(&mut board, PLAYER1, 0, 4, 1, 4);
-        modify(&mut board, PLAYER1, 1, 4, 4, 1);
+        modify(&mut board, PLAYER1, 1, 3, 2, 3);
+        modify(&mut board, PLAYER1, 2, 3, 3, 3);
+        modify(&mut board, PLAYER1, 3, 3, 4, 3);
+        modify(&mut board, PLAYER1, 0, 3, 1, 3);
+        modify(&mut board, PLAYER1, 1, 3, 3, 1);
 
-        let (type, player_number) = piece_at_access(&board, 4, 1);
+        let (type, player_number) = piece_at_access(&board, 3, 1);
         assert!(type == QUEEN, (type as u64));
         assert!(player_number == PLAYER1, (PLAYER1 as u64));
 
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    fun test_modify_queen_diagonal_move_one_space() {
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 4, 2, 4);
+        modify(&mut board, PLAYER1, 2, 4, 3, 4);
+        modify(&mut board, PLAYER1, 0, 3, 1, 4);
+
+        let (type, _) = piece_at_access(&board, 1, 4);
+        assert!(type == QUEEN, (type as u64));
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 2)]
+    fun test_bad_modify_queen_no_jump() {
+        let board = new();
+        modify(&mut board, PLAYER1, 0, 3, 3, 0);
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 2)]
+    fun test_bad_modify_bishop_no_jump() {
+        let board = new();
+        modify(&mut board, PLAYER1, 0, 2, 2, 0);
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 2)]
+    fun test_bad_modify_rook_no_jump() {
+        let board = new();
+        modify(&mut board, PLAYER1, 0, 0, 3, 0);
         transfer::share_object(TestChessBoard { board });
     }
 }
