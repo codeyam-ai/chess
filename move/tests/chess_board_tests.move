@@ -393,6 +393,13 @@ module ethos::chess_board_tests {
     #[expected_failure(abort_code = 2)]
     fun test_bad_modify_rook_no_jump() {
         let board = new();
+        modify(&mut board, PLAYER1, 0, 0, 3, 0);
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    fun test_castling() {
+        let board = new();
         modify(&mut board, PLAYER1, 1, 0, 3, 0);
         modify(&mut board, PLAYER1, 1, 1, 3, 1);
         modify(&mut board, PLAYER1, 1, 2, 3, 2);
@@ -412,9 +419,17 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    fun test_castling() {
+    fun test_bad_castling_rook_already_moved() {
         let board = new();
-        modify(&mut board, PLAYER1, 0, 0, 3, 0);
+        modify(&mut board, PLAYER1, 1, 0, 3, 0);
+        modify(&mut board, PLAYER1, 1, 1, 3, 1);
+        modify(&mut board, PLAYER1, 1, 2, 3, 2);
+        modify(&mut board, PLAYER1, 0, 1, 2, 2);
+        modify(&mut board, PLAYER1, 0, 2, 1, 1);
+        modify(&mut board, PLAYER1, 0, 3, 1, 2);
+        modify(&mut board, PLAYER1, 0, 0, 1, 0);
+        modify(&mut board, PLAYER1, 1, 0, 0, 0);
+        modify(&mut board, PLAYER1, 0, 4, 0, 0);
         transfer::share_object(TestChessBoard { board });
     }
 

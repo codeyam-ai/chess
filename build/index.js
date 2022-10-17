@@ -19363,7 +19363,7 @@ async function listGames() {
   }
   
   const address = await walletSigner.getAddress();
-
+ch
   // for (const gameItem of eByClass('game-item')) {
   //   gameItem.parentNode.remove(gameItem);
   // }

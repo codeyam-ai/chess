@@ -32,6 +32,8 @@ module ethos::chess_board {
     
     struct ChessBoard has store, copy {
         spaces: vector<vector<Option<ChessPiece>>>,
+        castle_player1: bool,
+        castle_player2: bool,
         game_over: bool
     }
 
@@ -92,6 +94,8 @@ module ethos::chess_board {
 
         let game_board = ChessBoard { 
             spaces, 
+            castle_player1: false,
+            castle_player2: false,
             game_over: false
         };
 
@@ -107,7 +111,8 @@ module ethos::chess_board {
         let piece = option::extract(old_space);
         assert!(piece.player_number == player_number, EWRONG_PLAYER);
 
-        assert!(is_valid_move(&board.spaces, piece, from_row, from_col, to_row, to_col), EBAD_DESTINATION);
+        assert!(is_valid_move(board, piece, from_row, from_col, to_row, to_col), EBAD_DESTINATION);
+
         let new_space = space_at(board, to_row, to_col);
 
         if (option::is_some(new_space)) {
@@ -254,13 +259,14 @@ module ethos::chess_board {
     }
 
     fun is_valid_move(
-      spaces: &vector<vector<Option<ChessPiece>>>, 
+      board: &ChessBoard, 
       piece: ChessPiece, 
       from_row: u64, 
       from_col: u64,
       to_row: u64, 
       to_col: u64
     ): bool {
+        let spaces = &board.spaces;
         if (piece.type == PAWN) {
             if (piece.player_number == PLAYER1) {
                 if (from_row == 1 && from_row + 2 == to_row && from_col == to_col) {
@@ -318,8 +324,20 @@ module ethos::chess_board {
             };
             return check_over_space_empty(spaces, from_row, from_col, to_row, to_col)
         } else if (piece.type == KING) {
-            let other_piece = piece_at_space(spaces, to_row, to_col); 
-            if (other_piece.type == ROOK)
+            if (from_row == to_row && to_col == 0) {
+                if (from_row == 0 && board.castle_player1) {
+                    return false
+                };
+
+                if (from_row == 7 && board.castle_player2) {
+                    return false
+                };
+                
+                let king_clear = check_over_space_empty(spaces, from_row, 4, to_row, 2);
+                let rook_clear = check_over_space_empty(spaces, from_row, 0, to_row, 3);
+                return king_clear && rook_clear
+            };
+            
             if (
                 (from_row + 1 == to_row || from_row == to_row + 1 || from_row == to_row) &&
                 (from_col + 1 == to_col || from_row == to_col + 1 || from_col == to_col)
