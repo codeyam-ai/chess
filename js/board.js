@@ -1,5 +1,5 @@
 const { pieces } = require("./constants");
-const { eById, eByClass, addClass, removeClass, isReverse, isVertical } = require("./utils");
+const { eByClass, removeClass, isReverse, isVertical } = require("./utils");
 
 let active;
 
@@ -51,6 +51,7 @@ module.exports = {
       spaces: rawSpaces, 
       board_spaces: rawBoardSpaces,
       player: previousPlayer, 
+      winner: winner,
       game_over: gameOver
     } = board.fields || board;
     const spaces = (rawSpaces || rawBoardSpaces).map(
@@ -60,6 +61,6 @@ module.exports = {
         }
       )
     )
-    return { spaces, previousPlayer, gameOver }
+    return { spaces, previousPlayer, winner, gameOver }
   }
 }

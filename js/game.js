@@ -68,6 +68,7 @@ async function pollForNextMove() {
   const address = await walletSigner.getAddress()
 
   const { details: { data: { fields: game } } } = sharedObject;
+
   if (game.current_player === address) {
     isCurrentPlayer = true;
     removeClass(eById('current-player'), 'hidden');
@@ -76,6 +77,14 @@ async function pollForNextMove() {
     const boards = game.boards;
     const activeBoard = board.convertInfo(boards[boards.length - 1]);
     board.display(activeBoard);
+
+    if (!game.winner.fields) {
+      if (game.winner === address) {
+        modal.open("you-winner", 'board')
+      } else {
+        modal.open("opponent-winner", 'board')
+      }
+    }
   } else {
     setTimeout(pollForNextMove, 3000);
   }
@@ -91,11 +100,21 @@ async function handleResult(newBoard) {
     return;
   }
 
+  if (newBoard.gameOver || (newBoard.winner && !newBoard.winner.fields)) {
+    const address = await walletSigner.getAddress();
+    if (newBoard.winner === address) {
+      modal.open("you-winner", 'board')
+    } else {
+      modal.open("opponent-winner", 'board')
+    }
+    return;
+  }
+
   isCurrentPlayer = false;
   addClass(eById('current-player'), 'hidden');
   removeClass(eById('not-current-player'), 'hidden')
 
-  board.display(newBoard)
+  board.display(newBoard);
 
   pollForNextMove();
 }
@@ -228,13 +247,16 @@ async function listGames() {
     gameItem.id = `game-${game.address}`;
     const otherPlayer = game.player1 === address ? game.player2 : game.player1;
     const turn = game.current_player === address ? "Your Turn" : "Opponent's Turn";
+    const winLose = game.winner?.fields ? null : (
+      game.winner === address ? "You Won!" : "You Lost"
+    );
     gameItem.innerHTML = `
       <div>
         <div>
           Game vs. ${truncateMiddle(otherPlayer, 6)}
         </div>
         <div>
-          ${turn}
+          ${winLose || turn}
         </div>
         <div>
           <button id='game-${game.address}' class='primary-button'>Switch</button>
@@ -257,6 +279,15 @@ async function setActiveGame(game) {
   if (activeGameItem) {
     addClass(activeGameItem, 'hidden');
   } 
+
+  if (game.winner && !game.winner.fields) {
+    if (game.winner === address) {
+      modal.open("you-winner", 'board')
+    } else {
+      modal.open("opponent-winner", 'board')
+    }
+    return;
+  }
   
   const playerColor = game.player1 === address ? 'white' : 'black';
   eById('player-color').innerHTML = playerColor;
@@ -276,6 +307,7 @@ async function setActiveGame(game) {
   
   const boards = game.boards;
   const activeBoard = board.convertInfo(boards[boards.length - 1]);
+
   board.display(activeBoard);
   setOnClick(eByClass('tile-wrapper'), setPieceToMove)
 
@@ -301,6 +333,9 @@ async function setPieceToMove(e) {
   if (selectedPiece && selectedPiece !== node) {
     addClass(node, 'destination');
     moves.execute(walletSigner, selectedPiece.dataset, node.dataset, activeGameAddress, handleResult, handleError)
+  } else if (selectedPiece === node) {
+    removeClass(node, 'selected');
+    selectedPiece = null;
   } else {
     addClass(node, 'selected');
     selectedPiece = node;
@@ -350,7 +385,7 @@ const initializeClicks = () => {
     () => {
       if (games && games.length > 0) {
         removeClass(eById('game'), 'hidden');
-        setActiveGame(games[0]);
+        setActiveGame(games.filter(g => !!g.winner.fields)[0] || games[0]);
       } else if (walletSigner) {
         eByClass('new-game')[0].onclick();
       } else {
@@ -421,6 +456,7 @@ const onWalletConnected = async ({ signer }) => {
                 player1: address,
                 player2,
                 current_player: address,
+                winner: { fields: {} },
                 boards: [
                   {
                     board_spaces,
@@ -465,7 +501,7 @@ const onWalletConnected = async ({ signer }) => {
       modal.open('mint', 'board', true);  
     } else {
       modal.close();
-      setActiveGame(games[0]);
+      setActiveGame(games.filter(g => !!g.winner.fields)[0] || games[0]);
     }
     
     removeClass(document.body, 'signed-out');

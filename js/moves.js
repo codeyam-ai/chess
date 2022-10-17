@@ -34,6 +34,8 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
     signer: walletSigner, 
     details,
     onCompleted: async ({ data }) => {
+      ethos.hideWallet();
+
       if (data?.effects?.status?.error === "InsufficientGas") {
         onError()
         return;
@@ -54,7 +56,13 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
         return;
       }
 
-      const event = events[0].moveEvent;
+      let event
+      if (events.length === 2) {
+        onComplete(events[0].moveEvent.fields);
+        event = events[1].moveEvent;
+      } else {
+        event = events[0].moveEvent;
+      }
       
       onComplete(board.convertInfo(event));
       
@@ -115,8 +123,6 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
       // removeClass(eById('transactions'), 'hidden');
     }
   })
-
-  ethos.hideWallet();
 }
 
 const reset = () => moves = []
