@@ -47,8 +47,9 @@ module ethos::chess_board {
         column: u64
     }
 
-    struct MoveEffects has drop {
-        jumps: vector<SpacePosition>
+    struct MoveAnalysis has drop {
+        valid: bool,
+        castle: bool
     }
 
     public(friend) fun new(): ChessBoard {
@@ -111,7 +112,8 @@ module ethos::chess_board {
         let piece = option::extract(old_space);
         assert!(piece.player_number == player_number, EWRONG_PLAYER);
 
-        assert!(is_valid_move(board, piece, from_row, from_col, to_row, to_col), EBAD_DESTINATION);
+        let move_analysis = analyzeMove(board, piece, from_row, from_col, to_row, to_col);
+        assert!(move_analysis.valid, EBAD_DESTINATION);
 
         let new_space = space_at(board, to_row, to_col);
 
@@ -258,45 +260,51 @@ module ethos::chess_board {
         true
     }
 
-    fun is_valid_move(
+    fun analyzeMove(
       board: &ChessBoard, 
       piece: ChessPiece, 
       from_row: u64, 
       from_col: u64,
       to_row: u64, 
       to_col: u64
-    ): bool {
+    ): MoveAnalysis {
         let spaces = &board.spaces;
+        let valid = MoveAnalysis { valid: true, castle: false };
+        let invalid = MoveAnalysis { valid: false, castle: false };
         if (piece.type == PAWN) {
             if (piece.player_number == PLAYER1) {
                 if (from_row == 1 && from_row + 2 == to_row && from_col == to_col) {
-                    return check_over_space_empty(spaces, from_row, from_col, to_row, to_col)
+                    let clear = check_over_space_empty(spaces, from_row, from_col, to_row, to_col);
+                    return MoveAnalysis {
+                        valid: clear,
+                        castle: false
+                    }
                 } else if (from_row + 1 == to_row) {
                     if (from_col == to_col) {
-                        return true
+                        return valid
                     } else if (from_col + 1 == to_col || to_col + 1 == from_col) {
                         let capture_piece = piece_at_space(spaces, to_row, to_col);
                         if (capture_piece.player_number == PLAYER2) {
-                            return true
+                            return valid
                         };
-                        return false
+                        return invalid
                     }
                 }
             } else {
                 if (from_row == 6 && to_row + 2 == from_row && from_col == to_col) {
                     let over_piece = piece_at_space(spaces, to_row + 1, to_col);
                     if (over_piece.player_number == EMPTY) {
-                        return true
+                        return valid
                     }
                 } else if (to_row + 1 == from_row) {
                     if (from_col == to_col) {
-                        return true
+                        return valid
                     } else if (from_col + 1 == to_col || to_col + 1 == from_col) {
                         let capture_piece = piece_at_space(spaces, to_row, to_col);
                         if (capture_piece.player_number == PLAYER1) {
-                            return true
+                            return valid
                         };
-                        return false
+                        return invalid
                     }
                 }
             }
@@ -305,7 +313,11 @@ module ethos::chess_board {
                 (from_row == to_row && from_col != to_col) ||
                 (from_row != to_row && from_col == to_col)
             ) {
-                return check_over_space_empty(spaces, from_row, from_col, to_row, to_col)
+                let clear = check_over_space_empty(spaces, from_row, from_col, to_row, to_col);
+                return MoveAnalysis {
+                    valid: clear,
+                    castle: false
+                }
             }
         } else if (piece.type == KNIGHT) {
             if (
@@ -314,52 +326,62 @@ module ethos::chess_board {
                 (from_row + 1 == to_row && (from_col + 2 == to_col || from_col == to_col + 2)) ||
                 (from_row == to_row + 1 && (from_col + 2 == to_col || from_col == to_col + 2))
             ) {
-                return true
+                return valid
             }
         } else if (piece.type == BISHOP) {
             let row_diff = abs_subtract(from_row, to_row);
             let col_diff = abs_subtract(from_col, to_col);
             if (row_diff != col_diff) {
-               return false
+               return invalid
             };
-            return check_over_space_empty(spaces, from_row, from_col, to_row, to_col)
+            let clear = check_over_space_empty(spaces, from_row, from_col, to_row, to_col);
+
+            return MoveAnalysis {
+                valid: clear,
+                castle: false
+            }
         } else if (piece.type == KING) {
-            if (from_row == to_row && to_col == 0) {
+            if (from_row == to_row && from_col == 4 && to_col == 0) {
                 if (from_row == 0 && board.castle_player1) {
-                    return false
+                    return invalid
                 };
 
                 if (from_row == 7 && board.castle_player2) {
-                    return false
+                    return invalid
                 };
                 
                 let king_clear = check_over_space_empty(spaces, from_row, 4, to_row, 2);
                 let rook_clear = check_over_space_empty(spaces, from_row, 0, to_row, 3);
-                return king_clear && rook_clear
+                let clear = king_clear && rook_clear;
+                return MoveAnalysis {
+                  valid: clear,
+                  castle: false
+                }
             };
             
             if (
                 (from_row + 1 == to_row || from_row == to_row + 1 || from_row == to_row) &&
                 (from_col + 1 == to_col || from_row == to_col + 1 || from_col == to_col)
             ) {
-                return true
+                return valid
             }
         } else if (piece.type == QUEEN) {
             let over_empty = check_over_space_empty(spaces, from_row, from_col, to_row, to_col);
-            if (from_row == to_row || from_col == to_col) {
-                return over_empty
-            } else {
+            if (from_row != to_row && from_col != to_col) {
                 let row_diff = abs_subtract(from_row, to_row);
                 let col_diff = abs_subtract(from_col, to_col);
                 if (row_diff != col_diff) {
-                    return false
-                };
+                    return invalid
+                };    
+            };
 
-                return over_empty
+            return MoveAnalysis {
+                valid: over_empty,
+                castle: false
             }
         };
         
-        false
+        invalid
     }
 
     fun abs_subtract(value1: u64, value2: u64): u64 {
