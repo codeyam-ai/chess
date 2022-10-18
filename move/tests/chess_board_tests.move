@@ -435,6 +435,43 @@ module ethos::chess_board_tests {
         let (type, _) = piece_at_access(&board, 0, 3);
         assert!(type == ROOK, (type as u64));
 
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    fun test_castling_king_to_rook2() {
+        let board = new();
+        modify(&mut board, PLAYER2, 6, 7, 4, 7);
+        modify(&mut board, PLAYER2, 6, 6, 4, 6);
+        modify(&mut board, PLAYER2, 6, 5, 4, 5);
+        modify(&mut board, PLAYER2, 7, 6, 5, 5);
+        modify(&mut board, PLAYER2, 7, 5, 6, 6);
+        modify(&mut board, PLAYER2, 7, 4, 7, 7);
+
+        let (type, _) = piece_at_access(&board, 7, 6);
+        assert!(type == KING, (type as u64));
+
+        let (type, _) = piece_at_access(&board, 7, 5);
+        assert!(type == ROOK, (type as u64));
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    fun test_castling_rook_to_king2() {
+        let board = new();
+        modify(&mut board, PLAYER2, 6, 7, 4, 7);
+        modify(&mut board, PLAYER2, 6, 6, 4, 6);
+        modify(&mut board, PLAYER2, 6, 5, 4, 5);
+        modify(&mut board, PLAYER2, 7, 6, 5, 5);
+        modify(&mut board, PLAYER2, 7, 5, 6, 6);
+        modify(&mut board, PLAYER2, 7, 7, 7, 4);
+
+        let (type, _) = piece_at_access(&board, 7, 6);
+        assert!(type == KING, (type as u64));
+
+        let (type, _) = piece_at_access(&board, 7, 5);
+        assert!(type == ROOK, (type as u64));
 
         transfer::share_object(TestChessBoard { board });
     }
