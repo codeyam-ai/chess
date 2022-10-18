@@ -19,8 +19,8 @@ module ethos::chess_board {
     const ROOK: u8 = 2;
     const KNIGHT: u8 = 3;
     const BISHOP: u8 = 4;
-    const KING: u8 = 5;
-    const QUEEN: u8 = 6;
+    const QUEEN: u8 = 5;
+    const KING: u8 = 6;
     
     const ROW_COUNT: u64 = 8;
     const COLUMN_COUNT: u64 = 8;
@@ -114,6 +114,14 @@ module ethos::chess_board {
 
         let move_analysis = analyzeMove(board, piece, from_row, from_col, to_row, to_col);
         assert!(move_analysis.valid, EBAD_DESTINATION);
+
+        if (piece.type == KING || piece.type == ROOK) {
+            if (player_number == 1) {
+                board.castle_player1 = true
+            } else if (player_number == 2) {
+                board.castle_player2 = true
+            }
+        };
 
         if (move_analysis.castle) {
             let rook = piece;
@@ -335,6 +343,24 @@ module ethos::chess_board {
                 }
             }
         } else if (piece.type == ROOK) {
+            if (from_row == to_row && from_col == 0 && to_col == 4) {
+                if (from_row == 0 && board.castle_player1) {
+                    return invalid
+                };
+
+                if (from_row == 7 && board.castle_player2) {
+                    return invalid
+                };
+                
+                let king_clear = check_over_space_empty(spaces, from_row, 4, to_row, 2);
+                let rook_clear = check_over_space_empty(spaces, from_row, 0, to_row, 3);
+                let clear = king_clear && rook_clear;
+                return MoveAnalysis {
+                    valid: clear,
+                    castle: true
+                }
+            };
+
             if (
                 (from_row == to_row && from_col != to_col) ||
                 (from_row != to_row && from_col == to_col)
@@ -380,17 +406,17 @@ module ethos::chess_board {
                 let rook_clear = check_over_space_empty(spaces, from_row, 0, to_row, 3);
                 let clear = king_clear && rook_clear;
                 return MoveAnalysis {
-                  valid: clear,
-                  castle: true
+                    valid: clear,
+                    castle: true
                 }
             };
             
             if (
                 (from_row + 1 == to_row || from_row == to_row + 1 || from_row == to_row) &&
-                (from_col + 1 == to_col || from_row == to_col + 1 || from_col == to_col)
+                (from_col + 1 == to_col || from_col == to_col + 1 || from_col == to_col)
             ) {
                 return valid
-            }
+            };
         } else if (piece.type == QUEEN) {
             let over_empty = check_over_space_empty(spaces, from_row, from_col, to_row, to_col);
             if (from_row != to_row && from_col != to_col) {

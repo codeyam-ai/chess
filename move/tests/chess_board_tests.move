@@ -13,8 +13,8 @@ module ethos::chess_board_tests {
     const ROOK: u8 = 2;
     const KNIGHT: u8 = 3;
     const BISHOP: u8 = 4;
-    const KING: u8 = 5;
-    const QUEEN: u8 = 6;
+    const QUEEN: u8 = 5;
+    const KING: u8 = 6;
 
     struct TestChessBoard has key {
         board: ChessBoard
@@ -398,7 +398,28 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    fun test_castling() {
+    fun test_castling_king_to_rook() {
+        let board = new();
+        modify(&mut board, PLAYER2, 6, 0, 4, 0);
+        modify(&mut board, PLAYER2, 6, 1, 4, 1);
+        modify(&mut board, PLAYER2, 6, 2, 4, 2);
+        modify(&mut board, PLAYER2, 7, 1, 5, 2);
+        modify(&mut board, PLAYER2, 7, 2, 6, 1);
+        modify(&mut board, PLAYER2, 7, 3, 6, 2);
+        modify(&mut board, PLAYER2, 7, 4, 7, 0);
+
+        let (type, _) = piece_at_access(&board, 7, 2);
+        assert!(type == KING, (type as u64));
+
+        let (type, _) = piece_at_access(&board, 7, 3);
+        assert!(type == ROOK, (type as u64));
+
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    fun test_castling_rook_to_king() {
         let board = new();
         modify(&mut board, PLAYER1, 1, 0, 3, 0);
         modify(&mut board, PLAYER1, 1, 1, 3, 1);
@@ -419,6 +440,7 @@ module ethos::chess_board_tests {
     }
 
     #[test]
+    #[expected_failure(abort_code = 2)]
     fun test_bad_castling_rook_already_moved() {
         let board = new();
         modify(&mut board, PLAYER1, 1, 0, 3, 0);
@@ -430,6 +452,22 @@ module ethos::chess_board_tests {
         modify(&mut board, PLAYER1, 0, 0, 1, 0);
         modify(&mut board, PLAYER1, 1, 0, 0, 0);
         modify(&mut board, PLAYER1, 0, 4, 0, 0);
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 2)]
+    fun test_bad_castling_king_already_moved() {
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 0, 3, 0);
+        modify(&mut board, PLAYER1, 1, 1, 3, 1);
+        modify(&mut board, PLAYER1, 1, 2, 3, 2);
+        modify(&mut board, PLAYER1, 0, 1, 2, 2);
+        modify(&mut board, PLAYER1, 0, 2, 1, 1);
+        modify(&mut board, PLAYER1, 0, 3, 1, 2);
+        modify(&mut board, PLAYER1, 0, 4, 0, 3);
+        modify(&mut board, PLAYER1, 0, 3, 0, 4);
+        modify(&mut board, PLAYER1, 0, 0, 0, 4);
         transfer::share_object(TestChessBoard { board });
     }
 
