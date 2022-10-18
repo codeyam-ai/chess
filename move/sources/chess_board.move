@@ -115,6 +115,32 @@ module ethos::chess_board {
         let move_analysis = analyzeMove(board, piece, from_row, from_col, to_row, to_col);
         assert!(move_analysis.valid, EBAD_DESTINATION);
 
+        if (move_analysis.castle) {
+            let rook = piece;
+            if (from_col == 4) {
+              let rook_space = space_at_mut(board, from_row, 0);
+              rook = option::extract(rook_space);
+            };
+            
+            option::fill(
+              space_at_mut(board, from_row, 3),
+              rook
+            );
+
+            let king = piece;
+            if (from_col == 0) {
+                let king_space = space_at_mut(board, from_row, 4);
+                king = option::extract(king_space);
+            };
+            
+            option::fill(
+              space_at_mut(board, from_row, 2), 
+              king
+            );
+
+            return true
+        };
+
         let new_space = space_at(board, to_row, to_col);
 
         if (option::is_some(new_space)) {
@@ -355,7 +381,7 @@ module ethos::chess_board {
                 let clear = king_clear && rook_clear;
                 return MoveAnalysis {
                   valid: clear,
-                  castle: false
+                  castle: true
                 }
             };
             
