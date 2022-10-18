@@ -472,6 +472,20 @@ module ethos::chess_board_tests {
     }
 
     #[test]
+    fun test_en_passant() {
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 2, 3, 2);
+        modify(&mut board, PLAYER1, 3, 2, 4, 2);
+        modify(&mut board, PLAYER2, 6, 1, 4, 1);
+        
+        assert!(empty_space_count(&board) == 32, empty_space_count(&board));
+        modify(&mut board, PLAYER1, 4, 2, 5, 1);
+        assert!(empty_space_count(&board) == 33, empty_space_count(&board));
+        
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
     fun test_game_over() {
         let board = new();
         modify(&mut board, PLAYER1, 1, 2, 3, 2);
