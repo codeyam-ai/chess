@@ -414,7 +414,6 @@ module ethos::chess_board_tests {
         let (type, _) = piece_at_access(&board, 7, 3);
         assert!(type == ROOK, (type as u64));
 
-
         transfer::share_object(TestChessBoard { board });
     }
 
@@ -427,7 +426,7 @@ module ethos::chess_board_tests {
         modify(&mut board, PLAYER1, 0, 1, 2, 2);
         modify(&mut board, PLAYER1, 0, 2, 1, 1);
         modify(&mut board, PLAYER1, 0, 3, 1, 2);
-        modify(&mut board, PLAYER1, 0, 4, 0, 0);
+        modify(&mut board, PLAYER1, 0, 0, 0, 4);
 
         let (type, _) = piece_at_access(&board, 0, 2);
         assert!(type == KING, (type as u64));

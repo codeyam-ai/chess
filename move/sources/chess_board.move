@@ -126,26 +126,43 @@ module ethos::chess_board {
         if (move_analysis.castle) {
             let rook = piece;
             if (from_col == 4) {
-              let rook_space = space_at_mut(board, from_row, 0);
-              rook = option::extract(rook_space);
+                let rook_space = space_at_mut(board, from_row, 0);
+                if (to_col == 7) {
+                    rook_space = space_at_mut(board, from_row, 7);
+                };
+                rook = option::extract(rook_space);
             };
             
-            option::fill(
-              space_at_mut(board, from_row, 3),
-              rook
-            );
+            if (from_col == 0 || to_col == 0) {
+                option::fill(
+                    space_at_mut(board, from_row, 3),
+                    rook
+                );
+            } else {
+                option::fill(
+                    space_at_mut(board, from_row, 5),
+                    rook
+                );
+            };
 
             let king = piece;
-            if (from_col == 0) {
+            if (from_col == 0 || from_col == 7) {
                 let king_space = space_at_mut(board, from_row, 4);
                 king = option::extract(king_space);
             };
             
-            option::fill(
-              space_at_mut(board, from_row, 2), 
-              king
-            );
-
+            if (from_col == 0 || to_col == 0) {
+                option::fill(
+                    space_at_mut(board, from_row, 2), 
+                    king
+                );
+            } else {
+                option::fill(
+                    space_at_mut(board, from_row, 6), 
+                    king
+                );
+            };
+            
             return true
         };
 
@@ -343,7 +360,7 @@ module ethos::chess_board {
                 }
             }
         } else if (piece.type == ROOK) {
-            if (from_row == to_row && from_col == 0 && to_col == 4) {
+            if (from_row == to_row && (from_col == 0 || from_col == 7) && to_col == 4) {
                 if (from_row == 0 && board.castle_player1) {
                     return invalid
                 };
@@ -353,8 +370,17 @@ module ethos::chess_board {
                 };
                 
                 let king_clear = check_over_space_empty(spaces, from_row, 4, to_row, 2);
+                if (from_col == 7) {
+                    king_clear = check_over_space_empty(spaces, from_row, 4, to_row, 6);
+                };
+
                 let rook_clear = check_over_space_empty(spaces, from_row, 0, to_row, 3);
+                if (from_col == 7) {
+                    rook_clear = check_over_space_empty(spaces, from_row, 7, to_row, 5);
+                };
+
                 let clear = king_clear && rook_clear;
+
                 return MoveAnalysis {
                     valid: clear,
                     castle: true
@@ -393,7 +419,7 @@ module ethos::chess_board {
                 castle: false
             }
         } else if (piece.type == KING) {
-            if (from_row == to_row && from_col == 4 && to_col == 0) {
+            if (from_row == to_row && from_col == 4 && (to_col == 0 || to_col == 7)) {
                 if (from_row == 0 && board.castle_player1) {
                     return invalid
                 };
@@ -403,8 +429,17 @@ module ethos::chess_board {
                 };
                 
                 let king_clear = check_over_space_empty(spaces, from_row, 4, to_row, 2);
+                if (to_col == 7) {
+                    king_clear = check_over_space_empty(spaces, from_row, 4, to_row, 6);
+                };
+
                 let rook_clear = check_over_space_empty(spaces, from_row, 0, to_row, 3);
+                if (to_col == 7) {
+                    rook_clear = check_over_space_empty(spaces, from_row, 7, to_row, 5);
+                };
+
                 let clear = king_clear && rook_clear;
+
                 return MoveAnalysis {
                     valid: clear,
                     castle: true
