@@ -508,6 +508,49 @@ module ethos::chess_board_tests {
     }
 
     #[test]
+    fun test_castling_even_if_other_rook_moved() {
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 0, 3, 0);
+        modify(&mut board, PLAYER1, 1, 1, 3, 1);
+        modify(&mut board, PLAYER1, 1, 2, 3, 2);
+        modify(&mut board, PLAYER1, 0, 1, 2, 2);
+        modify(&mut board, PLAYER1, 0, 2, 1, 1);
+        modify(&mut board, PLAYER1, 0, 3, 1, 2);
+        modify(&mut board, PLAYER1, 1, 7, 3, 7);
+        modify(&mut board, PLAYER1, 0, 7, 2, 7);
+        modify(&mut board, PLAYER1, 0, 0, 0, 4);
+
+        let (type, _) = piece_at_access(&board, 0, 2);
+        assert!(type == KING, (type as u64));
+
+        let (type, _) = piece_at_access(&board, 0, 3);
+        assert!(type == ROOK, (type as u64));
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+     #[test]
+    fun test_castling_even_if_other_rook_moved_king_initiated() {
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 7, 3, 7);
+        modify(&mut board, PLAYER1, 1, 6, 3, 6);
+        modify(&mut board, PLAYER1, 1, 5, 3, 5);
+        modify(&mut board, PLAYER1, 0, 6, 2, 5);
+        modify(&mut board, PLAYER1, 0, 5, 1, 6);
+        modify(&mut board, PLAYER1, 1, 0, 3, 0);
+        modify(&mut board, PLAYER1, 0, 0, 2, 0);
+        modify(&mut board, PLAYER1, 0, 4, 0, 7);
+
+        let (type, _) = piece_at_access(&board, 0, 6);
+        assert!(type == KING, (type as u64));
+
+        let (type, _) = piece_at_access(&board, 0, 5);
+        assert!(type == ROOK, (type as u64));
+
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
     fun test_en_passant() {
         let board = new();
         modify(&mut board, PLAYER1, 1, 2, 3, 2);
@@ -517,6 +560,38 @@ module ethos::chess_board_tests {
         assert!(empty_space_count(&board) == 32, empty_space_count(&board));
         modify(&mut board, PLAYER1, 4, 2, 5, 1);
         assert!(empty_space_count(&board) == 33, empty_space_count(&board));
+        
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    fun test_pawn_promotion() {
+        let board = new();
+        modify(&mut board, PLAYER1, 1, 2, 3, 2);
+        modify(&mut board, PLAYER1, 3, 2, 4, 2);
+        modify(&mut board, PLAYER1, 4, 2, 5, 2);
+        modify(&mut board, PLAYER1, 5, 2, 6, 3);
+        modify(&mut board, PLAYER1, 6, 3, 7, 2);
+        
+        let (type, player_number) = piece_at_access(&board, 7, 2);
+        assert!(type == QUEEN, (type as u64));
+        assert!(player_number == PLAYER1, (player_number as u64));
+        
+        transfer::share_object(TestChessBoard { board });
+    }
+
+    #[test]
+    fun test_pawn_promotion_player2() {
+        let board = new();
+        modify(&mut board, PLAYER2, 6, 2, 4, 2);
+        modify(&mut board, PLAYER2, 4, 2, 3, 2);
+        modify(&mut board, PLAYER2, 3, 2, 2, 2);
+        modify(&mut board, PLAYER2, 2, 2, 1, 3);
+        modify(&mut board, PLAYER2, 1, 3, 0, 2);
+        
+        let (type, player_number) = piece_at_access(&board, 0, 2);
+        assert!(type == QUEEN, (type as u64));
+        assert!(player_number == PLAYER2, (player_number as u64));
         
         transfer::share_object(TestChessBoard { board });
     }

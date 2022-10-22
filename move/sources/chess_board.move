@@ -32,14 +32,14 @@ module ethos::chess_board {
     
     struct ChessBoard has store, copy {
         spaces: vector<vector<Option<ChessPiece>>>,
-        castle_player1: bool,
-        castle_player2: bool,
         game_over: bool
     }
 
     struct ChessPiece has store, copy, drop {
         type: u8,
-        player_number: u8
+        player_number: u8,
+        en_passant: bool,
+        invalid_castle: bool
     }
 
     struct SpacePosition has copy, drop {
@@ -94,9 +94,7 @@ module ethos::chess_board {
         };
 
         let game_board = ChessBoard { 
-            spaces, 
-            castle_player1: false,
-            castle_player2: false,
+            spaces,
             game_over: false
         };
 
@@ -116,11 +114,7 @@ module ethos::chess_board {
         assert!(move_analysis.valid, EBAD_DESTINATION);
 
         if (piece.type == KING || piece.type == ROOK) {
-            if (player_number == 1) {
-                board.castle_player1 = true
-            } else if (player_number == 2) {
-                board.castle_player2 = true
-            }
+            piece.invalid_castle = true
         };
 
         if (move_analysis.castle) {
@@ -231,7 +225,9 @@ module ethos::chess_board {
         if (option::is_none(option)) {
             return ChessPiece { 
                 type: EMPTY, 
-                player_number: EMPTY
+                player_number: EMPTY,
+                invalid_castle: false,
+                en_passant: false
             }
         };
 
@@ -277,7 +273,9 @@ module ethos::chess_board {
         };
         ChessPiece {
             type,
-            player_number
+            player_number,
+            invalid_castle: false,
+            en_passant: false
         }
     }
 
@@ -361,11 +359,8 @@ module ethos::chess_board {
             }
         } else if (piece.type == ROOK) {
             if (from_row == to_row && (from_col == 0 || from_col == 7) && to_col == 4) {
-                if (from_row == 0 && board.castle_player1) {
-                    return invalid
-                };
-
-                if (from_row == 7 && board.castle_player2) {
+                let king = piece_at(board, from_row, 4);
+                if (piece.invalid_castle || king.invalid_castle) {
                     return invalid
                 };
                 
@@ -420,11 +415,8 @@ module ethos::chess_board {
             }
         } else if (piece.type == KING) {
             if (from_row == to_row && from_col == 4 && (to_col == 0 || to_col == 7)) {
-                if (from_row == 0 && board.castle_player1) {
-                    return invalid
-                };
-
-                if (from_row == 7 && board.castle_player2) {
+                let rook = piece_at(board, to_row, to_col);
+                if (piece.invalid_castle || rook.invalid_castle) {
                     return invalid
                 };
                 
