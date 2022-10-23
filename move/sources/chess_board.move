@@ -526,6 +526,4 @@ module ethos::chess_board {
             return value2 - value1
         }
     }
-
 }
-
