@@ -126,6 +126,18 @@ module ethos::chess_board {
                 let en_passant_space_mut = space_at_mut(board, from_row, to_col);
                 option::swap(en_passant_space_mut, piece);
                 return true
+            };
+
+            if (
+                (piece.player_number == PLAYER1 && to_row == 7) ||
+                (piece.player_number == PLAYER2 && to_row == 0)
+            ) {
+                piece = ChessPiece {
+                    type: QUEEN,
+                    player_number: piece.player_number,
+                    en_passant: false,
+                    invalid_castle: false
+                }
             }
         };
 
