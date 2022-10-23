@@ -49,7 +49,9 @@ module ethos::chess_board {
 
     struct MoveAnalysis has drop {
         valid: bool,
-        castle: bool
+        castle: bool,
+        en_passant: bool,
+        en_passant_capture: bool
     }
 
     public(friend) fun new(): ChessBoard {
@@ -115,6 +117,16 @@ module ethos::chess_board {
 
         if (piece.type == KING || piece.type == ROOK) {
             piece.invalid_castle = true
+        };
+
+        if (piece.type == PAWN) {
+            piece.en_passant = move_analysis.en_passant;
+
+            if (move_analysis.en_passant_capture) {
+                let en_passant_space_mut = space_at_mut(board, from_row, to_col);
+                option::swap(en_passant_space_mut, piece);
+                return true
+            }
         };
 
         if (move_analysis.castle) {
@@ -318,14 +330,33 @@ module ethos::chess_board {
       to_col: u64
     ): MoveAnalysis {
         let spaces = &board.spaces;
-        let valid = MoveAnalysis { valid: true, castle: false };
-        let invalid = MoveAnalysis { valid: false, castle: false };
+        let valid = MoveAnalysis { valid: true, castle: false, en_passant: false, en_passant_capture: false };
+        let invalid = MoveAnalysis { valid: false, castle: false, en_passant: false, en_passant_capture: false };
         if (piece.type == PAWN) {
+            if ((from_row == 3 || from_row == 4) && (from_col == to_col + 1 || from_col + 1 == to_col)) {
+                let en_passant_piece = piece_at(board, from_row, to_col);
+                if (en_passant_piece.en_passant) {
+                    let destination_piece = piece_at(board, to_row, to_col);
+                    if (destination_piece.type == EMPTY) {
+                        return MoveAnalysis {
+                            valid: true,
+                            en_passant: false,
+                            en_passant_capture: true,
+                            castle: false
+                        }
+                    } else {
+                        return invalid
+                    }
+                }
+            };
+
             if (piece.player_number == PLAYER1) {
                 if (from_row == 1 && from_row + 2 == to_row && from_col == to_col) {
                     let clear = check_over_space_empty(spaces, from_row, from_col, to_row, to_col);
                     return MoveAnalysis {
                         valid: clear,
+                        en_passant: true,
+                        en_passant_capture: false,
                         castle: false
                     }
                 } else if (from_row + 1 == to_row) {
@@ -341,9 +372,12 @@ module ethos::chess_board {
                 }
             } else {
                 if (from_row == 6 && to_row + 2 == from_row && from_col == to_col) {
-                    let over_piece = piece_at_space(spaces, to_row + 1, to_col);
-                    if (over_piece.player_number == EMPTY) {
-                        return valid
+                    let clear = check_over_space_empty(spaces, from_row, from_col, to_row, to_col);
+                    return MoveAnalysis {
+                        valid: clear,
+                        en_passant: true,
+                        castle: false,
+                        en_passant_capture: false
                     }
                 } else if (to_row + 1 == from_row) {
                     if (from_col == to_col) {
@@ -378,7 +412,9 @@ module ethos::chess_board {
 
                 return MoveAnalysis {
                     valid: clear,
-                    castle: true
+                    castle: true,
+                    en_passant: false,
+                    en_passant_capture: false
                 }
             };
 
@@ -389,7 +425,9 @@ module ethos::chess_board {
                 let clear = check_over_space_empty(spaces, from_row, from_col, to_row, to_col);
                 return MoveAnalysis {
                     valid: clear,
-                    castle: false
+                    castle: false,
+                    en_passant: false,
+                    en_passant_capture: false
                 }
             }
         } else if (piece.type == KNIGHT) {
@@ -411,7 +449,9 @@ module ethos::chess_board {
 
             return MoveAnalysis {
                 valid: clear,
-                castle: false
+                castle: false,
+                en_passant: false,
+                en_passant_capture: false
             }
         } else if (piece.type == KING) {
             if (from_row == to_row && from_col == 4 && (to_col == 0 || to_col == 7)) {
@@ -434,7 +474,9 @@ module ethos::chess_board {
 
                 return MoveAnalysis {
                     valid: clear,
-                    castle: true
+                    castle: true,
+                    en_passant: false,
+                    en_passant_capture: false
                 }
             };
             
@@ -456,7 +498,9 @@ module ethos::chess_board {
 
             return MoveAnalysis {
                 valid: over_empty,
-                castle: false
+                castle: false,
+                en_passant: false,
+                en_passant_capture: false
             }
         };
         
