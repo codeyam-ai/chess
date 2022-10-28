@@ -21,7 +21,7 @@ module.exports = {
         spaceElement.dataset.column = j;
 
         removeClass(spaceElement, ['selected', 'destination']);
-        if (column.player_number) {
+        if (column) {
           spaceElement.innerHTML = pieces[`${column.player_number}${column.type}`]
           spaceElement.dataset.player = column.player_number;
           spaceElement.dataset.type = column.type;
@@ -47,6 +47,7 @@ module.exports = {
   },
 
   convertInfo: (board) => {
+    console.log("BOARD", board)
     const { 
       spaces: rawSpaces, 
       board_spaces: rawBoardSpaces,
@@ -57,7 +58,7 @@ module.exports = {
     const spaces = (rawSpaces || rawBoardSpaces).map(
       (rawRow) => rawRow.map(
         (rawSpace) => {
-          return rawSpace.fields
+          return rawSpace?.fields
         }
       )
     )

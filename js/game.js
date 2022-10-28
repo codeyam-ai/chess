@@ -63,7 +63,7 @@ function init() {
 async function pollForNextMove() {
   if (!walletSigner) return;
 
-  const provider = new JsonRpcProvider('https://gateway.devnet.sui.io/');
+  const provider = new JsonRpcProvider('https://fullnode.devnet.sui.io/');
   const sharedObject = await provider.getObject(activeGameAddress);
   const address = await walletSigner.getAddress()
 
@@ -78,7 +78,7 @@ async function pollForNextMove() {
     const activeBoard = board.convertInfo(boards[boards.length - 1]);
     board.display(activeBoard);
 
-    if (!game.winner.fields) {
+    if (game.winner) {
       if (game.winner === address) {
         modal.open("you-winner", 'board')
       } else {
@@ -100,7 +100,7 @@ async function handleResult(newBoard) {
     return;
   }
 
-  if (newBoard.gameOver || (newBoard.winner && !newBoard.winner.fields)) {
+  if (newBoard.gameOver || newBoard.winner) {
     const address = await walletSigner.getAddress();
     if (newBoard.winner === address) {
       modal.open("you-winner", 'board')
@@ -139,7 +139,7 @@ function showNotYourTurnError() {
 async function syncAccountState() {
   if (!walletSigner) return;
   const address =  await walletSigner.getAddress();
-  const provider = new JsonRpcProvider('https://gateway.devnet.sui.io/');
+  const provider = new JsonRpcProvider('https://fullnode.devnet.sui.io/');
   await provider.syncAccountState(address);
 }
 
@@ -210,9 +210,9 @@ async function loadGames() {
     })
   );
 
-  const provider = new JsonRpcProvider('https://gateway.devnet.sui.io/');
+  const provider = new JsonRpcProvider('https://fullnode.devnet.sui.io/');
   const sharedObjects = await provider.getObjectBatch(playerCaps.map(p => p.gameId));
-  
+
   games = sharedObjects.map(
     (sharedObject) => {
       const { details: { data: { fields } } } = sharedObject;
@@ -280,7 +280,7 @@ async function setActiveGame(game) {
     addClass(activeGameItem, 'hidden');
   } 
 
-  if (game.winner && !game.winner.fields) {
+  if (game.winner) {
     if (game.winner === address) {
       modal.open("you-winner", 'board')
     } else {
@@ -385,7 +385,7 @@ const initializeClicks = () => {
     () => {
       if (games && games.length > 0) {
         removeClass(eById('game'), 'hidden');
-        setActiveGame(games.filter(g => !!g.winner.fields)[0] || games[0]);
+        setActiveGame(games.filter(g => !g.winner)[0] || games[0]);
       } else if (walletSigner) {
         eByClass('new-game')[0].onclick();
       } else {
@@ -501,7 +501,7 @@ const onWalletConnected = async ({ signer }) => {
       modal.open('mint', 'board', true);  
     } else {
       modal.close();
-      setActiveGame(games.filter(g => !!g.winner.fields)[0] || games[0]);
+      setActiveGame(games.filter(g => !g.winner)[0] || games[0]);
     }
     
     removeClass(document.body, 'signed-out');
