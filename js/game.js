@@ -10,7 +10,8 @@ const {
   addClass, 
   removeClass,
   truncateMiddle,
-  setOnClick
+  setOnClick,
+  formatBalance
 } = require('./utils');
 const modal = require('./modal');
 const board = require('./board');
@@ -78,7 +79,7 @@ async function pollForNextMove() {
     const activeBoard = board.convertInfo(boards[boards.length - 1]);
     board.display(activeBoard);
 
-    if (game.winner) {
+    if (game.winner && !game.winner?.fields) {
       if (game.winner === address) {
         modal.open("you-winner", 'board')
       } else {
@@ -100,7 +101,7 @@ async function handleResult(newBoard) {
     return;
   }
 
-  if (newBoard.gameOver || newBoard.winner) {
+  if (newBoard.gameOver || (newBoard.winner && !newBoard.winner?.fields)) {
     const address = await walletSigner.getAddress();
     if (newBoard.winner === address) {
       modal.open("you-winner", 'board')
@@ -191,7 +192,7 @@ async function loadWalletContents() {
     tryDrip(address);
   }
 
-  eById('balance').innerHTML = balance.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' SUI';
+  eById('balance').innerHTML = formatBalance(balance, 9) + ' SUI';
 }
 
 async function loadGames() {
@@ -280,7 +281,7 @@ async function setActiveGame(game) {
     addClass(activeGameItem, 'hidden');
   } 
 
-  if (game.winner) {
+  if (game.winner && !game.winner?.fields) {
     if (game.winner === address) {
       modal.open("you-winner", 'board')
     } else {
