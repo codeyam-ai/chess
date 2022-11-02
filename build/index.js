@@ -68,7 +68,7 @@ module.exports = {
 }
 },{"./constants":2,"./utils":6}],2:[function(require,module,exports){
 module.exports = {
-  contractAddress: "0xbd93c6189c12d477f09c62c1be663db0a41ae4e7",
+  contractAddress: "0x662b4031fb49dbf4ac934841609cbeb9011ccf37",
   pieces: {
     '11': `
       <svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="0 0 2048 2048" id="svg2" version="1.1" inkscape:version="0.48.2 r9819" width="100%" height="100%" sodipodi:docname="wp.svg">
@@ -627,8 +627,8 @@ async function setActiveGame(game) {
   modal.close();
   removeClass(eById("game"), 'hidden');
   addClass(eByClass('play-button'), 'selected')
-  addClass(eById('verifiable-top'), 'hidden');
-  removeClass(eById('verifiable-bottom'), 'hidden');
+  // addClass(eById('verifiable-top'), 'hidden');
+  // removeClass(eById('verifiable-bottom'), 'hidden');
 }
 
 async function setPieceToMove(e) {

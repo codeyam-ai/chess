@@ -73,7 +73,7 @@ input {
 }
 
 .highlight {
-  padding: 10px;
+  padding: 3px;
   background-color: #cff2f7;
   color: #28a2b4;
   border-radius: 24px;
@@ -81,6 +81,7 @@ input {
   justify-content: center;
   align-items: center;
   gap: 6px;
+  margin: 0 60px;
 }
 
 .container {
@@ -111,14 +112,34 @@ input {
   align-items: center;
   line-height: 24px;
   font-size: 16px;
-  font-weight: 500;
-  /* height: 30px; */
+  font-weight: 400;
   overflow: visible;
+  margin-bottom: 12px;
 }
 
 .header-title {
   font-variant: small-caps;
-  font-size: 24px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.header-logo {
+  color: #726F80;
+  font-size: 14px;
+}
+
+.header-logo svg {
+  margin-bottom: -6px;
+  margin-left: -6px;
+}
+
+.header-instructions {
+  font-size: 14px;
+  text-align: center;
+  flex: 1;
 }
 
 .header-buttons {
@@ -146,6 +167,7 @@ input {
   display: flex;
   justify-content: end;
   position: relative;
+  flex: 1;
 }
 
 .start-button {
@@ -275,8 +297,8 @@ input {
 
 .instructions {
   text-align: center;
-  padding: 0 90px;
   font-weight: 300;
+  font-size: 12px;
 }
 
 .instructions a {
@@ -348,12 +370,18 @@ input {
 }
 
 .tile-wrapper {
-  background-color: #fbfaf9;
+  background-color: #E4E4E4;
   border-radius: 12px;
   width: 60px;
   height: 60px;
   cursor: pointer;
 }
+
+.row:nth-child(even) .tile-wrapper:nth-child(odd),
+.row:nth-child(odd) .tile-wrapper:nth-child(even) {
+  background-color: #28A2B4;
+}
+
 
 .tile,
 .tile-result {
@@ -373,38 +401,6 @@ input {
 
 .tile-wrapper.destination {
   background-color: #ccc;
-}
-
-.signed-out .row-1 .tile {
-  background-color: #49c5fa;
-}
-
-.signed-out .row-2 .tile {
-  background-color: #4eb7f7;
-}
-
-.signed-out .row-3 .tile {
-  background-color: #53a9f5;
-}
-
-.signed-out .row-4 .tile {
-  background-color: #579af2;
-}
-
-.signed-out .row-5 .tile {
-  background-color: #49c5fa;
-}
-
-.signed-out .row-6 .tile {
-  background-color: #4eb7f7;
-}
-
-.signed-out .row-7 .tile {
-  background-color: #53a9f5;
-}
-
-.signed-out .row-8 .tile {
-  background-color: #579af2;
 }
 
 .value {
@@ -630,7 +626,7 @@ a:visited.link-button {
   font-size: small;
 }
 
-.game-item>div {
+.game-item > div {
   display: flex;
   justify-content: space-between;
   align-items: center;

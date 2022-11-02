@@ -315,8 +315,8 @@ async function setActiveGame(game) {
   modal.close();
   removeClass(eById("game"), 'hidden');
   addClass(eByClass('play-button'), 'selected')
-  addClass(eById('verifiable-top'), 'hidden');
-  removeClass(eById('verifiable-bottom'), 'hidden');
+  // addClass(eById('verifiable-top'), 'hidden');
+  // removeClass(eById('verifiable-bottom'), 'hidden');
 }
 
 async function setPieceToMove(e) {
