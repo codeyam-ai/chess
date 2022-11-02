@@ -1,7 +1,7 @@
 const React = require('react');
 const ReactDOM = require('react-dom/client');
-const { EthosWrapper, SignInButton, ethos } = require('ethos-wallet-beta');
-const { JsonRpcProvider } = require("@mysten/sui.js");
+const { EthosWrapper, SignInButton, ethos } = require('ethos-connect-staging');
+const { JsonRpcProvider, Network } = require("@mysten/sui.js");
 
 const { contractAddress } = require('./constants');
 const { 
@@ -64,7 +64,7 @@ function init() {
 async function pollForNextMove() {
   if (!walletSigner) return;
 
-  const provider = new JsonRpcProvider('https://fullnode.devnet.sui.io/');
+  const provider = new JsonRpcProvider(Network.DEVNET);
   const sharedObject = await provider.getObject(activeGameAddress);
   const address = await walletSigner.getAddress()
 
@@ -137,13 +137,6 @@ function showNotYourTurnError() {
   removeClass(eById("error-not-your-turn"), 'hidden');
 }
 
-async function syncAccountState() {
-  if (!walletSigner) return;
-  const address =  await walletSigner.getAddress();
-  const provider = new JsonRpcProvider('https://fullnode.devnet.sui.io/');
-  await provider.syncAccountState(address);
-}
-
 async function tryDrip() {
   if (!walletSigner || faucetUsed) return;
 
@@ -158,12 +151,6 @@ async function tryDrip() {
     console.log("Error with drip", e);
     faucetUsed = false;
     return;
-  }
-
-  try {
-    await syncAccountState();
-  } catch (e) {
-    console.log("Error with syncing account state", e);
   }
 
   if (!success) {
@@ -211,7 +198,7 @@ async function loadGames() {
     })
   );
 
-  const provider = new JsonRpcProvider('https://fullnode.devnet.sui.io/');
+  const provider = new JsonRpcProvider(Network.DEVNET);
   const sharedObjects = await provider.getObjectBatch(playerCaps.map(p => p.gameId));
 
   games = sharedObjects.map(
@@ -315,8 +302,8 @@ async function setActiveGame(game) {
   modal.close();
   removeClass(eById("game"), 'hidden');
   addClass(eByClass('play-button'), 'selected')
-  // addClass(eById('verifiable-top'), 'hidden');
-  // removeClass(eById('verifiable-bottom'), 'hidden');
+  addClass(eById('verifiable-top'), 'hidden');
+  removeClass(eById('verifiable-bottom'), 'hidden');
 }
 
 async function setPieceToMove(e) {

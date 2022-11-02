@@ -1,10 +1,5 @@
-const { ethos } = require("ethos-wallet-beta");
+const { ethos } = require("ethos-connect-staging");
 const { contractAddress } = require("./constants");
-const { 
-  eById, 
-  addClass, 
-  removeClass
-} = require('./utils');
 const board = require('./board');
 
 let moves = {};

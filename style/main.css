@@ -109,11 +109,12 @@ input {
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   line-height: 24px;
   font-size: 16px;
   font-weight: 400;
   overflow: visible;
+  padding: 6px 0;
   margin-bottom: 12px;
 }
 
@@ -184,7 +185,7 @@ input {
   flex-direction: column;
   align-items: center;
   position: absolute;
-  top: -21px;
+  top: -6px;
 }
 
 .sui-address-main {
@@ -375,13 +376,24 @@ input {
   width: 60px;
   height: 60px;
   cursor: pointer;
+  border: 6px solid #E4E4E4;
+}
+
+.row .tile-wrapper.selected {
+  background-color: #FCE9D6 !important;
+  border-color: #E3D2C2 !important;
+}
+
+.row .tile-wrapper.destination {
+  background-color: #FCE9D6 !important;
+  border-color: #E3D2C2 !important;
 }
 
 .row:nth-child(even) .tile-wrapper:nth-child(odd),
 .row:nth-child(odd) .tile-wrapper:nth-child(even) {
   background-color: #28A2B4;
+  border-color: #28A2B4;
 }
-
 
 .tile,
 .tile-result {
@@ -393,14 +405,6 @@ input {
   justify-content: center;
   align-items: center;
   text-align: center;
-}
-
-.tile-wrapper.selected {
-  background-color: #ccc;
-}
-
-.tile-wrapper.destination {
-  background-color: #ccc;
 }
 
 .value {
