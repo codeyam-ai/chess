@@ -30,7 +30,7 @@ module ethos::chess_board {
     const EBAD_DESTINATION: u64 = 2;
     const EOCCUPIED_SPACE: u64 = 3;
     
-    struct ChessBoard has store, copy {
+    struct ChessBoard has store, copy, drop {
         spaces: vector<vector<Option<ChessPiece>>>,
         game_over: bool
     }
