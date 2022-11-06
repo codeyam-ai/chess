@@ -1,6 +1,6 @@
 const React = require('react');
 const ReactDOM = require('react-dom/client');
-const { EthosWrapper, SignInButton, ethos } = require('ethos-connect-staging');
+const { EthosWrapper, SignInButton, ethos } = require('ethos-connect');
 const { JsonRpcProvider, Network } = require("@mysten/sui.js");
 
 const { contractAddress } = require('./constants');
@@ -137,12 +137,10 @@ function showNotYourTurnError() {
   removeClass(eById("error-not-your-turn"), 'hidden');
 }
 
-async function tryDrip() {
+async function tryDrip(address, balance) {
   if (!walletSigner || faucetUsed) return;
 
   faucetUsed = true;
-
-  const address =  await walletSigner.getAddress();
 
   let success;
   try {
@@ -173,10 +171,10 @@ async function loadWalletContents() {
   const address = await walletSigner.getAddress();
   eById('wallet-address').innerHTML = truncateMiddle(address, 4);
   walletContents = await ethos.getWalletContents(address, 'sui');
-  const balance = (walletContents.balance || "").toString();
+  const balance = (walletContents.suiBalance || "").toString();
 
   if (balance < 5000000) {
-    tryDrip(address);
+    tryDrip(address, balance);
   }
 
   eById('balance').innerHTML = formatBalance(balance, 9) + ' SUI';
@@ -415,19 +413,22 @@ const onWalletConnected = async ({ signer }) => {
 
             modal.open('loading', 'container');
 
-            const details = {
-              network: 'sui',
-              address: contractAddress,
-              moduleName: 'chess',
-              functionName: 'create_game',
-              inputValues: [player2],
-              gasBudget: 5000
+            const signableTransaction = {
+                kind: "moveCall",
+                data: {
+                    packageObjectId: contractAddress,
+                    module: 'chess',
+                    function: 'create_game',
+                    typeArguments: [],
+                    arguments: [player2],
+                    gasBudget: 5000
+                }
             };
         
             try {
               const data = await ethos.transact({
                 signer: walletSigner, 
-                details
+                signableTransaction
               })
 
               if (!data) {
