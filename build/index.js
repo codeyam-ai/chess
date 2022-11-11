@@ -19,7 +19,7 @@ module.exports = {
         const column = row[j];
         const spaceElement = spaceElements[(reverseI * spaces.length) + j];
 
-        spaceElement.dataset.row = reverseI;
+        spaceElement.dataset.row = i;
         spaceElement.dataset.column = j;
 
         removeClass(spaceElement, ['selected', 'destination']);
@@ -49,7 +49,6 @@ module.exports = {
   },
 
   convertInfo: (board) => {
-    console.log("BOARD", board)
     const { 
       spaces: rawSpaces, 
       board_spaces: rawBoardSpaces,
@@ -69,7 +68,7 @@ module.exports = {
 }
 },{"./constants":2,"./utils":6}],2:[function(require,module,exports){
 module.exports = {
-  contractAddress: "0xfc697f89cd1bef561c586e94c763b7977806ae4",
+  contractAddress: "0x15d08a9ce48ca8f26bf18b2ce511c06d55d41b73",
   pieces: {
     '11': `
       <svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="0 0 2048 2048" id="svg2" version="1.1" inkscape:version="0.48.2 r9819" width="100%" height="100%" sodipodi:docname="wp.svg">
@@ -329,7 +328,6 @@ const {
 const modal = require('./modal');
 const board = require('./board');
 const moves = require('./moves');
-const { active } = require('./board');
 
 const DASHBOARD_LINK = 'https://ethoswallet.xyz/dashboard';
 
@@ -433,9 +431,20 @@ async function handleResult(newBoard) {
   pollForNextMove();
 }
 
-function handleError(error) {
-  eById('error-unknown-message').innerHTML = error;
-  removeClass(eById("error-unknown"), 'hidden');
+function handleError({ error }) {
+    if (!error) {
+        showGasError();
+        return;
+    }
+
+    if (error.indexOf(`Identifier("chess_board") }, 1`) > -1) {
+        showInvalidMoveError();
+        reset();
+        return;
+    }
+
+    eById('error-unknown-message').innerHTML = error;
+    removeClass(eById("error-unknown"), 'hidden');
 }
 
 function showGasError() {
@@ -568,6 +577,12 @@ async function listGames() {
   }
 }
 
+function reset() {
+    removeClass(eByClass('destination'), 'destination');
+    removeClass(eByClass('selected'), 'selected');
+    selectedPiece = null;
+}
+
 async function setActiveGame(game) {
   const address = await walletSigner.getAddress();
   activeGameAddress = game.address;
@@ -602,7 +617,6 @@ async function setActiveGame(game) {
   }
 
   eById('transactions-list').innerHTML = "";
-  moves.reset();
   
   const boards = game.boards;
   const activeBoard = board.convertInfo(boards[boards.length - 1]);
@@ -662,18 +676,19 @@ const initializeClicks = () => {
     async (e) => {
       e.stopPropagation();
       await ethos.logout(walletSigner);
-      walletSigner = null;
-      games = null;
-      activeGameAddress = null;
-      walletContents = {};
+      window.location.reload();
+    //   walletSigner = null;
+    //   games = null;
+    //   activeGameAddress = null;
+    //   walletContents = {};
 
-      addClass(document.body, 'signed-out');
-      removeClass(document.body, 'signed-in');
-      removeClass(eById('game'), 'hidden');
+    //   addClass(document.body, 'signed-out');
+    //   removeClass(document.body, 'signed-in');
+    //   removeClass(eById('game'), 'hidden');
       
-      board.clear();
+    //   board.clear();
       
-      modal.open('get-started', 'board', true);
+    //   modal.open('get-started', 'board', true);
     }
   );
 
@@ -870,8 +885,6 @@ const { ethos } = require("ethos-connect");
 const { contractAddress } = require("./constants");
 const board = require('./board');
 
-let moves = {};
-
 const constructTransaction = (selected, destination, activeGameAddress) => {
   return {
     kind: "moveCall",
@@ -905,32 +918,31 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
     ethos.hideWallet();
 
     if (data?.effects?.status?.error === "InsufficientGas") {
-    onError()
-    return;
+        onError({})
+        return;
+    }
+
+    if (data?.effects?.status?.error) {
+        onError({ error: data.effects.status.error })
+        return;
     }
 
     if (data.error) {
-    onError(data.error);
-    return;
+        onError({ error: data.error });
+        return;
     }
 
     if (!data) return;
     const { effects } = data;
     const { gasUsed, events} = effects;
-    const { computationCost, storageCost, storageRebate } = gasUsed;
+    // const { computationCost, storageCost, storageRebate } = gasUsed;
 
     if (!events) {
         onComplete();
         return;
     }
-    let event
-    if (events.length === 2) {
-        onComplete(events[1].mutateObject.fields);
-        event = events[1].moveEvent;
-    } else {
-        event = events[0].moveEvent;
-    }
     
+    const event = events.find((e) => e.moveEvent).moveEvent;
     onComplete(board.convertInfo(event));
     
     // const { fields } = event;
@@ -990,12 +1002,9 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
     // removeClass(eById('transactions'), 'hidden');
 }
 
-const reset = () => moves = []
-
 module.exports = {
   constructTransaction,
-  execute,
-  reset
+  execute
 };
 },{"./board":1,"./constants":2,"ethos-connect":44}],6:[function(require,module,exports){
 const BigNumber = require('bignumber.js');

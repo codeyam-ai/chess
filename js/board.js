@@ -18,7 +18,7 @@ module.exports = {
         const column = row[j];
         const spaceElement = spaceElements[(reverseI * spaces.length) + j];
 
-        spaceElement.dataset.row = reverseI;
+        spaceElement.dataset.row = i;
         spaceElement.dataset.column = j;
 
         removeClass(spaceElement, ['selected', 'destination']);
@@ -48,7 +48,6 @@ module.exports = {
   },
 
   convertInfo: (board) => {
-    console.log("BOARD", board)
     const { 
       spaces: rawSpaces, 
       board_spaces: rawBoardSpaces,

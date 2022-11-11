@@ -2,8 +2,6 @@ const { ethos } = require("ethos-connect");
 const { contractAddress } = require("./constants");
 const board = require('./board');
 
-let moves = {};
-
 const constructTransaction = (selected, destination, activeGameAddress) => {
   return {
     kind: "moveCall",
@@ -37,32 +35,31 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
     ethos.hideWallet();
 
     if (data?.effects?.status?.error === "InsufficientGas") {
-    onError()
-    return;
+        onError({})
+        return;
+    }
+
+    if (data?.effects?.status?.error) {
+        onError({ error: data.effects.status.error })
+        return;
     }
 
     if (data.error) {
-    onError(data.error);
-    return;
+        onError({ error: data.error });
+        return;
     }
 
     if (!data) return;
     const { effects } = data;
     const { gasUsed, events} = effects;
-    const { computationCost, storageCost, storageRebate } = gasUsed;
+    // const { computationCost, storageCost, storageRebate } = gasUsed;
 
     if (!events) {
         onComplete();
         return;
     }
-    let event
-    if (events.length === 2) {
-        onComplete(events[1].mutateObject.fields);
-        event = events[1].moveEvent;
-    } else {
-        event = events[0].moveEvent;
-    }
     
+    const event = events.find((e) => e.moveEvent).moveEvent;
     onComplete(board.convertInfo(event));
     
     // const { fields } = event;
@@ -122,10 +119,7 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
     // removeClass(eById('transactions'), 'hidden');
 }
 
-const reset = () => moves = []
-
 module.exports = {
   constructTransaction,
-  execute,
-  reset
+  execute
 };

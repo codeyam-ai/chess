@@ -127,7 +127,9 @@ input {
   flex: 1;
 }
 
-.header-logo {
+.header-logo,
+.header-logo:visited,
+.header-logo:hover {
   color: #726f80;
   font-size: 14px;
 }

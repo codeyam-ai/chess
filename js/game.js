@@ -16,7 +16,6 @@ const {
 const modal = require('./modal');
 const board = require('./board');
 const moves = require('./moves');
-const { active } = require('./board');
 
 const DASHBOARD_LINK = 'https://ethoswallet.xyz/dashboard';
 
@@ -120,9 +119,20 @@ async function handleResult(newBoard) {
   pollForNextMove();
 }
 
-function handleError(error) {
-  eById('error-unknown-message').innerHTML = error;
-  removeClass(eById("error-unknown"), 'hidden');
+function handleError({ error }) {
+    if (!error) {
+        showGasError();
+        return;
+    }
+
+    if (error.indexOf(`Identifier("chess_board") }, 1`) > -1) {
+        showInvalidMoveError();
+        reset();
+        return;
+    }
+
+    eById('error-unknown-message').innerHTML = error;
+    removeClass(eById("error-unknown"), 'hidden');
 }
 
 function showGasError() {
@@ -255,6 +265,12 @@ async function listGames() {
   }
 }
 
+function reset() {
+    removeClass(eByClass('destination'), 'destination');
+    removeClass(eByClass('selected'), 'selected');
+    selectedPiece = null;
+}
+
 async function setActiveGame(game) {
   const address = await walletSigner.getAddress();
   activeGameAddress = game.address;
@@ -289,7 +305,6 @@ async function setActiveGame(game) {
   }
 
   eById('transactions-list').innerHTML = "";
-  moves.reset();
   
   const boards = game.boards;
   const activeBoard = board.convertInfo(boards[boards.length - 1]);
@@ -349,18 +364,19 @@ const initializeClicks = () => {
     async (e) => {
       e.stopPropagation();
       await ethos.logout(walletSigner);
-      walletSigner = null;
-      games = null;
-      activeGameAddress = null;
-      walletContents = {};
+      window.location.reload();
+    //   walletSigner = null;
+    //   games = null;
+    //   activeGameAddress = null;
+    //   walletContents = {};
 
-      addClass(document.body, 'signed-out');
-      removeClass(document.body, 'signed-in');
-      removeClass(eById('game'), 'hidden');
+    //   addClass(document.body, 'signed-out');
+    //   removeClass(document.body, 'signed-in');
+    //   removeClass(eById('game'), 'hidden');
       
-      board.clear();
+    //   board.clear();
       
-      modal.open('get-started', 'board', true);
+    //   modal.open('get-started', 'board', true);
     }
   );
 
