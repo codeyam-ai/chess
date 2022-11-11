@@ -388,6 +388,11 @@ async function pollForNextMove() {
 
     const boards = game.boards;
     const activeBoard = board.convertInfo(boards[boards.length - 1]);
+    const gameInGames = games.find(
+        (g) => g.address === activeGame.address
+    )
+    gameInGames.boards.push(activeBoard);
+    gameInGames.current_player = address;
     board.display(activeBoard, game.player1 === address);
 
     if (game.winner && !game.winner?.fields) {
@@ -427,11 +432,17 @@ async function handleResult(newBoard) {
   removeClass(eById('not-current-player'), 'hidden')
 
   board.display(newBoard, activeGame.player1 === address);
+  const game = games.find(
+    (g) => g.address === activeGame.address
+  )
+  game.current_player = game.current_player === game.player1 ? game.player2 : game.player1;
+  game.boards.push(newBoard)
+  listGames();
 
   pollForNextMove();
 }
 
-function handleError({ error }) {
+function handleError({ gameOver, error }) {
     if (!error) {
         showGasError();
         return;
@@ -545,19 +556,19 @@ async function listGames() {
   
   const address = await walletSigner.getAddress();
 
-  // for (const gameItem of eByClass('game-item')) {
-  //   gameItem.parentNode.remove(gameItem);
-  // }
+  const gamesListList = eById('games-list-list');
+  gamesListList.innerHTML = "";
 
-  for (const game of games) {
+  const sortedGames = games.sort((a, b) => a.winner && b.winner ? 0 : (a.winner ? 1 : -1))
+  for (const game of sortedGames) {
     const gameItem = document.createElement("DIV");
     addClass(gameItem, 'game-item')
     gameItem.id = `game-${game.address}`;
     const otherPlayer = game.player1 === address ? game.player2 : game.player1;
     const turn = game.current_player === address ? "Your Turn" : "Opponent's Turn";
-    const winLose = game.winner?.fields ? null : (
+    const winLose = game.winner ? (
       game.winner === address ? "You Won!" : "You Lost"
-    );
+    ) : null;
     gameItem.innerHTML = `
       <div>
         <div>
@@ -573,7 +584,7 @@ async function listGames() {
     `;
     setOnClick(gameItem, () => setActiveGame(game));
 
-    gamesList.append(gameItem);
+    gamesListList.append(gameItem);
   }
 }
 
@@ -767,13 +778,13 @@ const onWalletConnected = async ({ signer }) => {
               const gameData = data.effects.events.find(
                 e => e.moveEvent
               ).moveEvent.fields;
-              const { board_spaces } = gameData;
+              const { game_id, player1, player2, board_spaces } = gameData;
               const game = {
-                address: data.effects.created[0].reference.objectId,
-                player1: address,
+                address: game_id,
+                player1,
                 player2,
                 current_player: address,
-                winner: { fields: {} },
+                winner: null,
                 boards: [
                   {
                     board_spaces,
@@ -912,8 +923,6 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
         signer: walletSigner,
         signableTransaction
     });
-
-    console.log("DATA", data)
     
     ethos.hideWallet();
 
@@ -941,9 +950,9 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
         onComplete();
         return;
     }
-    
-    const event = events.find((e) => e.moveEvent).moveEvent;
-    onComplete(board.convertInfo(event));
+
+    const { moveEvent } = events.find((e) => e.moveEvent && e.moveEvent.type.indexOf('ChessMoveEvent') > -1);
+    onComplete(board.convertInfo(moveEvent));
     
     // const { fields } = event;
     // const { last_tile: lastTile } = fields;

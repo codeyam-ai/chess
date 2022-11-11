@@ -29,8 +29,6 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
         signer: walletSigner,
         signableTransaction
     });
-
-    console.log("DATA", data)
     
     ethos.hideWallet();
 
@@ -58,9 +56,9 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
         onComplete();
         return;
     }
-    
-    const event = events.find((e) => e.moveEvent).moveEvent;
-    onComplete(board.convertInfo(event));
+
+    const { moveEvent } = events.find((e) => e.moveEvent && e.moveEvent.type.indexOf('ChessMoveEvent') > -1);
+    onComplete(board.convertInfo(moveEvent));
     
     // const { fields } = event;
     // const { last_tile: lastTile } = fields;
