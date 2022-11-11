@@ -1,22 +1,22 @@
 const { pieces } = require("./constants");
-const { eByClass, removeClass, isReverse, isVertical } = require("./utils");
+const { eByClass, removeClass } = require("./utils");
 
 let active;
 
 module.exports = {
   active: () => active,
 
-  display: (board) => {
+  display: (board, player1) => {
     const spaces = board.spaces
     const spaceElements = eByClass('tile-wrapper');
     
     for (let i=0; i<spaces.length; ++i) {
-      const reverseI = spaces.length - i - 1;
+      const playerI = player1 ? spaces.length - i - 1 : i;
       const row = spaces[i];
 
       for (let j=0; j<row.length; ++j) {
         const column = row[j];
-        const spaceElement = spaceElements[(reverseI * spaces.length) + j];
+        const spaceElement = spaceElements[(playerI * spaces.length) + j];
 
         spaceElement.dataset.row = i;
         spaceElement.dataset.column = j;

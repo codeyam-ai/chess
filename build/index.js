@@ -1,23 +1,23 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 const { pieces } = require("./constants");
-const { eByClass, removeClass, isReverse, isVertical } = require("./utils");
+const { eByClass, removeClass } = require("./utils");
 
 let active;
 
 module.exports = {
   active: () => active,
 
-  display: (board) => {
+  display: (board, player1) => {
     const spaces = board.spaces
     const spaceElements = eByClass('tile-wrapper');
     
     for (let i=0; i<spaces.length; ++i) {
-      const reverseI = spaces.length - i - 1;
+      const playerI = player1 ? spaces.length - i - 1 : i;
       const row = spaces[i];
 
       for (let j=0; j<row.length; ++j) {
         const column = row[j];
-        const spaceElement = spaceElements[(reverseI * spaces.length) + j];
+        const spaceElement = spaceElements[(playerI * spaces.length) + j];
 
         spaceElement.dataset.row = i;
         spaceElement.dataset.column = j;
@@ -334,7 +334,7 @@ const DASHBOARD_LINK = 'https://ethoswallet.xyz/dashboard';
 let walletSigner;
 let isCurrentPlayer;
 let games;
-let activeGameAddress;
+let activeGame;
 let walletContents = {};
 let contentsInterval;
 let selectedPiece;
@@ -376,7 +376,7 @@ async function pollForNextMove() {
   if (!walletSigner) return;
 
   const provider = new JsonRpcProvider(Network.DEVNET);
-  const sharedObject = await provider.getObject(activeGameAddress);
+  const sharedObject = await provider.getObject(activeGame.address);
   const address = await walletSigner.getAddress()
 
   const { details: { data: { fields: game } } } = sharedObject;
@@ -388,7 +388,7 @@ async function pollForNextMove() {
 
     const boards = game.boards;
     const activeBoard = board.convertInfo(boards[boards.length - 1]);
-    board.display(activeBoard);
+    board.display(activeBoard, game.player1 === address);
 
     if (game.winner && !game.winner?.fields) {
       if (game.winner === address) {
@@ -403,6 +403,7 @@ async function pollForNextMove() {
 }
 
 async function handleResult(newBoard) { 
+  const address = await walletSigner.getAddress();
   selectedPiece = null;
 
   if (!newBoard) {
@@ -413,7 +414,6 @@ async function handleResult(newBoard) {
   }
 
   if (newBoard.gameOver || (newBoard.winner && !newBoard.winner?.fields)) {
-    const address = await walletSigner.getAddress();
     if (newBoard.winner === address) {
       modal.open("you-winner", 'board')
     } else {
@@ -426,7 +426,7 @@ async function handleResult(newBoard) {
   addClass(eById('current-player'), 'hidden');
   removeClass(eById('not-current-player'), 'hidden')
 
-  board.display(newBoard);
+  board.display(newBoard, activeGame.player1 === address);
 
   pollForNextMove();
 }
@@ -585,7 +585,7 @@ function reset() {
 
 async function setActiveGame(game) {
   const address = await walletSigner.getAddress();
-  activeGameAddress = game.address;
+  activeGame = game;
 
   removeClass(eByClass('game-item'), 'hidden');
   
@@ -621,7 +621,7 @@ async function setActiveGame(game) {
   const boards = game.boards;
   const activeBoard = board.convertInfo(boards[boards.length - 1]);
 
-  board.display(activeBoard);
+  board.display(activeBoard, game.player1 === address);
   setOnClick(eByClass('tile-wrapper'), setPieceToMove)
 
   modal.close();
@@ -645,7 +645,7 @@ async function setPieceToMove(e) {
 
   if (selectedPiece && selectedPiece !== node) {
     addClass(node, 'destination');
-    moves.execute(walletSigner, selectedPiece.dataset, node.dataset, activeGameAddress, handleResult, handleError)
+    moves.execute(walletSigner, selectedPiece.dataset, node.dataset, activeGame.address, handleResult, handleError)
   } else if (selectedPiece === node) {
     removeClass(node, 'selected');
     selectedPiece = null;
@@ -679,7 +679,7 @@ const initializeClicks = () => {
       window.location.reload();
     //   walletSigner = null;
     //   games = null;
-    //   activeGameAddress = null;
+    //   activeGame = null;
     //   walletContents = {};
 
     //   addClass(document.body, 'signed-out');
