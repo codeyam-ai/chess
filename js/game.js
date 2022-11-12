@@ -1,6 +1,6 @@
 const React = require("react");
 const ReactDOM = require("react-dom/client");
-const { EthosWrapper, SignInButton, ethos } = require("ethos-connect");
+const { EthosConnectProvider, SignInButton, ethos } = require("ethos-connect");
 const { JsonRpcProvider, Network } = require("@mysten/sui.js");
 
 const { contractAddress } = require("./constants");
@@ -42,7 +42,7 @@ function init() {
     children: "Sign In",
   });
 
-  const wrapper = React.createElement(EthosWrapper, {
+  const wrapper = React.createElement(EthosConnectProvider, {
     ethosConfiguration,
     onWalletConnected,
     children: [button],
