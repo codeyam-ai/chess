@@ -126,6 +126,11 @@ async function handleResult(newBoard) {
 }
 
 function handleError({ gameOver, error }) {
+  if (gameOver) {
+    showGameOver();
+    return;
+  }
+
   if (!error) {
     showGasError();
     return;
@@ -139,6 +144,10 @@ function handleError({ gameOver, error }) {
 
   eById("error-unknown-message").innerHTML = error;
   removeClass(eById("error-unknown"), "hidden");
+}
+
+function showGameOver() {
+  removeClass(eById("error-game-over"), "hidden");
 }
 
 function showGasError() {
