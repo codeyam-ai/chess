@@ -795,7 +795,7 @@ const onWalletConnected = async ({ signer }) => {
             games.push(game);
             await listGames();
             setActiveGame(game);
-            ethos.hideWallet();
+            ethos.hideWallet(walletSigner);
           } catch (e) {
             console.log("Error creating new game", e);
             modal.open("create-error", "container");
@@ -917,7 +917,7 @@ const execute = async (walletSigner, selected, destination, activeGameAddress, o
         signableTransaction
     });
     
-    ethos.hideWallet();
+    ethos.hideWallet(walletSigner);
 
     if (data?.effects?.status?.error === "InsufficientGas") {
         onError({})
