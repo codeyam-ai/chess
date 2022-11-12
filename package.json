@@ -15,7 +15,7 @@
     "static-server": "^2.2.1"
   },
   "scripts": {
-    "build": "npx browserify js/* > build/index.js",
-    "start": "yarn build && npx browser-sync start --server"
+    "build": "mkdir -p build && npx browserify js/* > build/index.js",
+    "start": "yarn && yarn build && npx browser-sync start --server"
   }
 }

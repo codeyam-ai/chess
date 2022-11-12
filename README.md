@@ -1,12 +1,10 @@
-# Ethos Chess
+# Sui Chess
 
 A fully on-chain chess game. Built on [Sui](https://sui.io) by [Ethos](https://ethoswallet.xyz).
 
-You can play Ethos Chess at [https://ethoswallet.github.io/chess](https://ethoswallet.github.io/chess)
+You can play Sui Chess at [https://ethoswallet.github.io/chess](https://ethoswallet.github.io/chess)
 
-Ethos Chess consists of a smart contract that allows the player to mint a game that is playable on chain.
-
-The front-end submits transaction to the Sui blockchain that calculates the next state of the game board. That next state is returned to the front end to display the next state. Most of the logic in the front-end involves diffing and animating the game board states to create an interesting and enjoyable user experience.
+Sui Chess consists of a smart contract that allows the player to mint a game that is playable on chain.
 
 ## Sui
 
@@ -64,12 +62,8 @@ It has react as a dependency to work properly with the Ethos apis which provide 
 
 ### Working With The Front-End
 
-#### Initialization
-
-`yarn`
-
 #### Running
 
 `yarn start`
 
-(Note: the site can also be built using `yarn build` and `index.html` can be opened, but some aspects of the game require it be run via a server - it still works as a statically hosted website, though)
+This will install all necessary dependencies, build the project, launch a server, and open a browser to the correct url.
