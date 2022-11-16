@@ -91,14 +91,18 @@ async function pollForNextMove() {
   }
 }
 
-async function handleResult(newBoard) {
+async function handleResult({ cancelled, newBoard }) {
   const address = await walletSigner.getAddress();
   selectedPiece = null;
 
-  if (!newBoard) {
-    showInvalidMoveError();
+  if (cancelled || !newBoard) {
     removeClass(eByClass("selected"), "selected");
     removeClass(eByClass("destination"), "destination");
+
+    if (!cancelled) {
+        showInvalidMoveError();
+    }
+    
     return;
   }
 
