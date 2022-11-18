@@ -1,12 +1,14 @@
 module ethos::chess {
+    use std::string::{Self, String};
+    use std::option::{Self, Option};
+
     use sui::object::{Self, ID, UID};
     use sui::tx_context::{Self, TxContext};
     use sui::url::{Self, Url};
-    use std::string::{Self, String};
     use sui::event;
     use sui::transfer;
-    use std::vector;
-    use std::option::{Self, Option};
+    use sui::table::{Self, Table};
+   
     use ethos::chess_board::{Self, ChessBoard, ChessPiece};
 
     const EINVALID_PLAYER: u64 = 0;
@@ -22,8 +24,8 @@ module ethos::chess {
         url: Url,
         player1: address,
         player2: address,
-        moves: vector<ChessMove>,
-        boards: vector<ChessBoard>,
+        moves: Table<u64, ChessMove>,
+        boards: Table<u64, ChessBoard>,
         current_player: address,
         winner: Option<address>
     }
@@ -81,7 +83,10 @@ module ethos::chess {
         let description = string::utf8(b"Chess - built on Sui  - by Ethos");
         let board_spaces = *chess_board::spaces(&new_board);
         let url = url::new_unsafe_from_bytes(b"https://arweave.net/ZUrXvtGA19RqxjUZ6QXHIy_W2MyctjGZLtMZheslvPo");
-        
+        let moves = table::new<u64, ChessMove>(ctx);
+        let boards = table::new<u64, ChessBoard>(ctx);
+        table::add(&mut boards, 0, new_board);
+
         let game = ChessGame {
             id: game_uid,
             name,
@@ -89,8 +94,8 @@ module ethos::chess {
             url,
             player1,
             player2,
-            moves: vector[],
-            boards: vector[new_board],
+            moves,
+            boards,
             current_player: player1,
             winner: option::none()
         };
@@ -184,8 +189,11 @@ module ethos::chess {
           epoch
         };
 
-        vector::push_back(&mut game.moves, new_move);
-        vector::push_back(&mut game.boards, new_board);
+        let total_moves = table::length(&game.moves);
+        table::add(&mut game.moves, total_moves, new_move);
+
+        let total_boards = table::length(&game.boards);
+        table::add(&mut game.boards, total_boards, new_board);
     }
 
     public fun game_id(game: &ChessGame): &UID {
@@ -201,24 +209,24 @@ module ethos::chess {
     }
 
     public fun move_count(game: &ChessGame): u64 {
-        vector::length(&game.moves)
+        table::length(&game.moves)
     }
 
     public fun board_at(game: &ChessGame, index: u64): &ChessBoard {
-        vector::borrow(&game.boards, index)
+        table::borrow(&game.boards, index)
     }
 
     public fun board_at_mut(game: &mut ChessGame, index: u64): &mut ChessBoard {
-        vector::borrow_mut(&mut game.boards, index)
+        table::borrow_mut(&mut game.boards, index)
     }
 
     public fun current_board(game: &ChessGame): &ChessBoard {
-        let last_board_index = vector::length(&game.boards) - 1;
+        let last_board_index = table::length(&game.boards) - 1;
         board_at(game, last_board_index)
     }
 
     public fun current_board_mut(game: &mut ChessGame): &mut ChessBoard {
-        let last_board_index = vector::length(&game.boards) - 1;
+        let last_board_index = table::length(&game.boards) - 1;
         board_at_mut(game, last_board_index)
     }
 
