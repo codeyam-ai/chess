@@ -26,6 +26,7 @@ module ethos::chess {
         player2: address,
         moves: Table<u64, ChessMove>,
         boards: Table<u64, ChessBoard>,
+        active_board: ChessBoard,
         current_player: address,
         winner: Option<address>
     }
@@ -96,6 +97,7 @@ module ethos::chess {
             player2,
             moves,
             boards,
+            active_board: new_board,
             current_player: player1,
             winner: option::none()
         };
@@ -194,6 +196,8 @@ module ethos::chess {
 
         let total_boards = table::length(&game.boards);
         table::add(&mut game.boards, total_boards, new_board);
+
+        game.active_board = new_board;
     }
 
     public fun game_id(game: &ChessGame): &UID {

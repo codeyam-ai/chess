@@ -72,10 +72,8 @@ async function pollForNextMove() {
     removeClass(eById("current-player"), "hidden");
     addClass(eById("not-current-player"), "hidden");
 
-    const boards = game.boards;
-    const activeBoard = board.convertInfo(boards[boards.length - 1]);
+    const activeBoard = board.convertInfo(game.active_board);
     const gameInGames = games.find((g) => g.address === activeGame.address);
-    gameInGames.boards.push(activeBoard);
     gameInGames.current_player = address;
     board.display(activeBoard, game.player1 === address);
 
@@ -123,7 +121,7 @@ async function handleResult({ cancelled, newBoard }) {
   const game = games.find((g) => g.address === activeGame.address);
   game.current_player =
     game.current_player === game.player1 ? game.player2 : game.player1;
-  game.boards.push(newBoard);
+  game.active_board = newBoard;
   listGames();
 
   pollForNextMove();
@@ -337,9 +335,7 @@ async function setActiveGame(game) {
 
   eById("transactions-list").innerHTML = "";
 
-  const boards = game.boards;
-  const activeBoard = board.convertInfo(boards[boards.length - 1]);
-
+  const activeBoard = game.active_board;
   board.display(activeBoard, game.player1 === address);
   setOnClick(eByClass("tile-wrapper"), setPieceToMove);
 
@@ -485,12 +481,10 @@ const onWalletConnected = async ({ signer }) => {
               player2,
               current_player: address,
               winner: null,
-              boards: [
-                {
-                  board_spaces,
-                  game_over: false,
-                },
-              ],
+              active_board: {
+                spaces: board_spaces,
+                game_over: false,
+              },
             };
 
             games.push(game);

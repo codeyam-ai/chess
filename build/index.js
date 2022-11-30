@@ -8,7 +8,7 @@ module.exports = {
   active: () => active,
 
   display: (board, player1) => {
-    const spaces = board.spaces
+    const spaces = board.spaces || board.fields?.spaces;
     const spaceElements = eByClass('tile-wrapper');
     
     for (let i=0; i<spaces.length; ++i) {
@@ -16,7 +16,7 @@ module.exports = {
       const row = spaces[i];
 
       for (let j=0; j<row.length; ++j) {
-        const column = row[j];
+        const column = row[j]?.fields || row[j];
         const spaceElement = spaceElements[(playerI * spaces.length) + j];
 
         spaceElement.dataset.row = i;
@@ -68,7 +68,7 @@ module.exports = {
 }
 },{"./constants":2,"./utils":6}],2:[function(require,module,exports){
 module.exports = {
-  contractAddress: "0x96f9aeb62cebd369ca4b76f34d04c56bcaf02b06",
+  contractAddress: "0x327f173a2d9cdac32a18700eb93b4412e7056596",
   pieces: {
     '11': `
       <svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="0 0 2048 2048" id="svg2" version="1.1" inkscape:version="0.48.2 r9819" width="100%" height="100%" sodipodi:docname="wp.svg">
@@ -384,10 +384,8 @@ async function pollForNextMove() {
     removeClass(eById("current-player"), "hidden");
     addClass(eById("not-current-player"), "hidden");
 
-    const boards = game.boards;
-    const activeBoard = board.convertInfo(boards[boards.length - 1]);
+    const activeBoard = board.convertInfo(game.active_board);
     const gameInGames = games.find((g) => g.address === activeGame.address);
-    gameInGames.boards.push(activeBoard);
     gameInGames.current_player = address;
     board.display(activeBoard, game.player1 === address);
 
@@ -435,7 +433,7 @@ async function handleResult({ cancelled, newBoard }) {
   const game = games.find((g) => g.address === activeGame.address);
   game.current_player =
     game.current_player === game.player1 ? game.player2 : game.player1;
-  game.boards.push(newBoard);
+  game.active_board = newBoard;
   listGames();
 
   pollForNextMove();
@@ -649,9 +647,7 @@ async function setActiveGame(game) {
 
   eById("transactions-list").innerHTML = "";
 
-  const boards = game.boards;
-  const activeBoard = board.convertInfo(boards[boards.length - 1]);
-
+  const activeBoard = game.active_board;
   board.display(activeBoard, game.player1 === address);
   setOnClick(eByClass("tile-wrapper"), setPieceToMove);
 
@@ -797,12 +793,10 @@ const onWalletConnected = async ({ signer }) => {
               player2,
               current_player: address,
               winner: null,
-              boards: [
-                {
-                  board_spaces,
-                  game_over: false,
-                },
-              ],
+              active_board: {
+                spaces: board_spaces,
+                game_over: false,
+              },
             };
 
             games.push(game);

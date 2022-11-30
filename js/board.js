@@ -7,7 +7,7 @@ module.exports = {
   active: () => active,
 
   display: (board, player1) => {
-    const spaces = board.spaces
+    const spaces = board.spaces || board.fields?.spaces;
     const spaceElements = eByClass('tile-wrapper');
     
     for (let i=0; i<spaces.length; ++i) {
@@ -15,7 +15,7 @@ module.exports = {
       const row = spaces[i];
 
       for (let j=0; j<row.length; ++j) {
-        const column = row[j];
+        const column = row[j]?.fields || row[j];
         const spaceElement = spaceElements[(playerI * spaces.length) + j];
 
         spaceElement.dataset.row = i;
