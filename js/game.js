@@ -23,7 +23,7 @@ let walletSigner;
 let isCurrentPlayer;
 let games;
 let activeGame;
-let walletContents = {};
+let walletContents;
 let contentsInterval;
 let selectedPiece;
 let faucetUsed = false;
@@ -179,10 +179,13 @@ async function tryDrip(address, balance) {
   }
 
   if (!success) {
-    const { balance: balanceCheck } = await ethos.getWalletContents(
+    const contents = await ethos.getWalletContents({ 
       address,
-      "sui"
-    );
+      existingContents: walletContents
+    });
+
+    const { suiBalance: balanceCheck } = contents || walletContents;
+
     if (balance !== balanceCheck) {
       success = true;
     }
@@ -200,7 +203,13 @@ async function loadWalletContents() {
   if (!walletSigner) return;
   const address = await walletSigner.getAddress();
   eById("wallet-address").innerHTML = truncateMiddle(address, 4);
-  walletContents = await ethos.getWalletContents(address, "sui");
+  const contents = await ethos.getWalletContents({ 
+    address, 
+    existingContents: walletContents 
+  });
+
+  if (contents) walletContents = contents;
+  
   const balance = (walletContents.suiBalance || "").toString();
 
   if (balance < 5000000) {
@@ -391,18 +400,6 @@ const initializeClicks = () => {
     e.stopPropagation();
     await ethos.logout(walletSigner);
     window.location.reload();
-    //   walletSigner = null;
-    //   games = null;
-    //   activeGame = null;
-    //   walletContents = {};
-
-    //   addClass(document.body, 'signed-out');
-    //   removeClass(document.body, 'signed-in');
-    //   removeClass(eById('game'), 'hidden');
-
-    //   board.clear();
-
-    //   modal.open('get-started', 'board', true);
   });
 
   setOnClick(eById("close-modal"), () => modal.close(true));
