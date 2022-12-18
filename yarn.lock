@@ -40,7 +40,7 @@
     rpc-websockets "^7.5.0"
     tweetnacl "^1.0.3"
 
-"@mysten/sui.js@0.20.0":
+"@mysten/sui.js@0.20.0", "@mysten/sui.js@^0.20.0":
   version "0.20.0"
   resolved "https://registry.yarnpkg.com/@mysten/sui.js/-/sui.js-0.20.0.tgz#f92b53352eb0673710442c8e5f864dd31b250752"
   integrity sha512-U25eSGKT08XPCRKHbrvDYlylOSAIQASMKKwnreC8vT3ukvQg1NwTX+SFZPvX+xsLZGS2b3yOQ2Uzhzho5/OIWA==
@@ -849,12 +849,12 @@ escape-string-regexp@^1.0.0:
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
   integrity sha512-vbRorB5FUQWvla16U8R/qgaFIya2qGzwDrNmCZuYKrbdSUMG6I1ZCGQRefkRVhuOkIGVne7BQ35DSfo1qvJqFg==
 
-ethos-connect@^0.0.58:
-  version "0.0.58"
-  resolved "https://registry.yarnpkg.com/ethos-connect/-/ethos-connect-0.0.58.tgz#5ba030886a1c2c30a13c23fd7c37b82210adc082"
-  integrity sha512-fHNUfqLGOA+dL3NRekXdH2nuBJVEvoD2gGHXugUyI9kszQRZTbqXL//qzzaO5zAqr1EwxvIeJhT/ykQdP5WlAg==
+ethos-connect@^0.0.59:
+  version "0.0.59"
+  resolved "https://registry.yarnpkg.com/ethos-connect/-/ethos-connect-0.0.59.tgz#3698e58d797ccbf70665112fda4f815cf28cd6bf"
+  integrity sha512-jwzySNakgTchJGEA60mCNd4OZi27yVd9eULC9znqKTe8bnC86rfEEnqTvKOz84qqqQu5ic64PJx2dfARWQYRxw==
   dependencies:
-    "@mysten/sui.js" "^0.15.0"
+    "@mysten/sui.js" "^0.20.0"
     "@mysten/wallet-adapter-all-wallets" "^0.3.0"
     "@mysten/wallet-adapter-base" "^0.3.1"
     "@mysten/wallet-adapter-react" "^6.0.0"
