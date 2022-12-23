@@ -68,7 +68,7 @@ module.exports = {
 }
 },{"./constants":2,"./utils":6}],2:[function(require,module,exports){
 module.exports = {
-  contractAddress: "0xcd747806b90bc3428014cc811428ec5fd918c98a",
+  contractAddress: "0xcf6694919cb20ad9737e01c4ba4ca5fd30db7d4a",
   pieces: {
     '11': `
       <svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="0 0 2048 2048" id="svg2" version="1.1" inkscape:version="0.48.2 r9819" width="100%" height="100%" sodipodi:docname="wp.svg">
