@@ -112,7 +112,7 @@ module ethos::chess_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 0)]
+    #[expected_failure(abort_code = chess::EINVALID_PLAYER)]
     fun test_aborts_if_wrong_player_tries_to_move() {
         use ethos::chess::{create_game, make_move};
 
@@ -143,7 +143,7 @@ module ethos::chess_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 0)]
+    #[expected_failure(abort_code = chess::EINVALID_PLAYER)]
     fun test_aborts_if_non_player_tries_to_move() {
         use ethos::chess::{create_game, make_move};
 

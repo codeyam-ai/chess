@@ -1,7 +1,7 @@
 
 #[test_only]
 module ethos::chess_board_tests {
-    use ethos::chess_board::{new, modify, empty_space_count, piece_at_access, game_over};
+    use ethos::chess_board::{Self, new, modify, empty_space_count, piece_at_access, game_over};
 
     const EMPTY: u8 = 0;
 
@@ -90,28 +90,28 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 0)]
+    #[expected_failure(abort_code = chess_board::EEMPTY_SPACE)]
     fun test_modify_bad_from_empty() {
         let board = new();
         modify(&mut board, PLAYER1, 2, 1, 3, 1);
     }
 
     #[test]
-    #[expected_failure(abort_code = 3)]
+    #[expected_failure(abort_code = chess_board::EOCCUPIED_SPACE)]
     fun test_modify_bad_space_occupied() {
         let board = new();
         modify(&mut board, PLAYER1, 0, 0, 0, 1);
     }
 
     #[test]
-    #[expected_failure(abort_code = 1)]
+    #[expected_failure(abort_code = chess_board::EWRONG_PLAYER)]
     fun test_modify_bad_from_wrong_player_player1() {
         let board = new();
         modify(&mut board, PLAYER2, 1, 1, 2, 1);
     }
 
     #[test]
-    #[expected_failure(abort_code = 1)]
+    #[expected_failure(abort_code = chess_board::EWRONG_PLAYER)]
     fun test_modify_bad_from_wrong_player_player2() {
         let board = new();
         modify(&mut board, PLAYER1, 6, 1, 5, 1);
@@ -129,7 +129,7 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_modify_bad_off_board_move_bottom() {
         let board = new();
         modify(&mut board, PLAYER1, 0, 6, 2, 7);
@@ -137,7 +137,7 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_modify_bad_off_board_move_right() {
         let board = new();
         modify(&mut board, PLAYER1, 0, 6, 2, 7);
@@ -147,14 +147,14 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_modify_bad_pawn_move() {
         let board = new();
         modify(&mut board, PLAYER1, 1, 1, 2, 2);
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_modify_bad_pawn_move_2() {
         let board = new();
         modify(&mut board, PLAYER1, 1, 1, 2, 1);
@@ -174,7 +174,7 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_modify_bad_pawn_move_2_spaces() {
         let board = new();
         modify(&mut board, PLAYER1, 1, 1, 3, 1);
@@ -182,7 +182,7 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_modify_bad_pawn_move_2_spaces_player2() {
         let board = new();
         modify(&mut board, PLAYER2, 6, 1, 4, 1);
@@ -190,7 +190,7 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_modify_bad_pawn_move_3() {
         let board = new();
         modify(&mut board, PLAYER2, 6, 1, 5, 1);
@@ -224,7 +224,7 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_modify_bad_pawn_capture() {
         let board = new();
         modify(&mut board, PLAYER1, 1, 1, 2, 1);
@@ -238,7 +238,7 @@ module ethos::chess_board_tests {
 
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_modify_bad_rook_move() {
         let board = new();
         modify(&mut board, PLAYER1, 1, 0, 2, 0);
@@ -248,14 +248,14 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_modify_bad_knight_move() {
         let board = new();
         modify(&mut board, PLAYER1, 0, 1, 2, 1);
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_modify_bad_knight_move_2() {
         let board = new();
         modify(&mut board, PLAYER1, 0, 1, 2, 2);
@@ -263,7 +263,7 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_modify_bad_bishop_move() {
         let board = new();
         modify(&mut board, PLAYER1, 1, 2, 2, 2);
@@ -271,7 +271,7 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_modify_bad_king_move() {
         let board = new();
         modify(&mut board, PLAYER1, 1, 4, 2, 4);
@@ -282,7 +282,7 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_modify_bad_queen_move() {
         let board = new();
         modify(&mut board, PLAYER1, 1, 4, 2, 4);
@@ -318,21 +318,21 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_bad_modify_queen_no_jump() {
         let board = new();
         modify(&mut board, PLAYER1, 0, 3, 3, 0);
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_bad_modify_bishop_no_jump() {
         let board = new();
         modify(&mut board, PLAYER1, 0, 2, 2, 0);
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_bad_modify_rook_no_jump() {
         let board = new();
         modify(&mut board, PLAYER1, 0, 0, 3, 0);
@@ -409,7 +409,7 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_bad_castling_rook_already_moved() {
         let board = new();
         modify(&mut board, PLAYER1, 1, 0, 3, 0);
@@ -424,7 +424,7 @@ module ethos::chess_board_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = chess_board::EBAD_DESTINATION)]
     fun test_bad_castling_king_already_moved() {
         let board = new();
         modify(&mut board, PLAYER1, 1, 0, 3, 0);
