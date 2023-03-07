@@ -68,7 +68,8 @@ module.exports = {
 }
 },{"./constants":2,"./utils":6}],2:[function(require,module,exports){
 module.exports = {
-  contractAddress: "0xa4cf4360745b6b7950d6f95fc2efca30530a7ce4",
+  network: "https://node.shinami.com/api/v1/3be8a6da87256601554fae7b46f9cf71",
+  contractAddress: "0x88e6359c938b6361a908982135a46e4d98a63da1",
   pieces: {
     '11': `
       <svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="0 0 2048 2048" id="svg2" version="1.1" inkscape:version="0.48.2 r9819" width="100%" height="100%" sodipodi:docname="wp.svg">
@@ -313,9 +314,9 @@ module.exports = {
 const React = require("react");
 const ReactDOM = require("react-dom/client");
 const { EthosConnectProvider, SignInButton, ethos } = require("ethos-connect");
-const { JsonRpcProvider, Network } = require("@mysten/sui.js");
+const { JsonRpcProvider } = require("@mysten/sui.js");
 
-const { contractAddress } = require("./constants");
+const { network, contractAddress } = require("./constants");
 const {
   eById,
   eByClass,
@@ -369,7 +370,7 @@ function init() {
 async function pollForNextMove() {
   if (!walletSigner) return;
 
-  const provider = new JsonRpcProvider(Network.DEVNET);
+  const provider = new JsonRpcProvider(network);
   const sharedObject = await provider.getObject(activeGame.address);
   const address = await walletSigner.getAddress();
 
@@ -545,7 +546,7 @@ async function loadGames() {
       gameId: nft.extraFields.game_id,
     }));
 
-  const provider = new JsonRpcProvider(Network.DEVNET);
+  const provider = new JsonRpcProvider(network);
   const sharedObjects = await provider.getObjectBatch(
     playerCaps.map((p) => p.gameId)
   );

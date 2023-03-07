@@ -1,9 +1,9 @@
 const React = require("react");
 const ReactDOM = require("react-dom/client");
 const { EthosConnectProvider, SignInButton, ethos } = require("ethos-connect");
-const { JsonRpcProvider, Network } = require("@mysten/sui.js");
+const { JsonRpcProvider } = require("@mysten/sui.js");
 
-const { contractAddress } = require("./constants");
+const { network, contractAddress } = require("./constants");
 const {
   eById,
   eByClass,
@@ -57,7 +57,7 @@ function init() {
 async function pollForNextMove() {
   if (!walletSigner) return;
 
-  const provider = new JsonRpcProvider(Network.DEVNET);
+  const provider = new JsonRpcProvider(network);
   const sharedObject = await provider.getObject(activeGame.address);
   const address = await walletSigner.getAddress();
 
@@ -233,7 +233,7 @@ async function loadGames() {
       gameId: nft.extraFields.game_id,
     }));
 
-  const provider = new JsonRpcProvider(Network.DEVNET);
+  const provider = new JsonRpcProvider(network);
   const sharedObjects = await provider.getObjectBatch(
     playerCaps.map((p) => p.gameId)
   );
